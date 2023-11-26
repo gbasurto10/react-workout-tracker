@@ -1,6 +1,6 @@
 // apiHandlers.js
 
-const IS_DEV = false;  // set this to true when developing at home, false otherwise
+const IS_DEV = true;  // set this to true when developing at home, false otherwise
 
 export const API_URL = IS_DEV ? 'http://192.168.1.162:3000' : 'http://api.codebyg.com:3000';
 export const API_KEY = '01241991';
@@ -27,6 +27,7 @@ export async function loginUser(email, password) {
 
 // Register user 
 export async function registerUser(email, password) {
+    console.log('Sending request with headers:', headers); 
     const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
         headers: headers,

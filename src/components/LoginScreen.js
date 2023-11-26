@@ -63,8 +63,10 @@ const LoginScreen = () => {
                         style={styles.input}
                     />
                 </div>
-                <button type="submit" style={styles.button}>Login</button>
-                <button type="button" onClick={handleRegisterClick} style={styles.button}>Register</button>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <button type="submit" style={styles.button}>Login</button>
+                    <button type="button" onClick={handleRegisterClick} style={styles.button}>Register</button>
+                </div>
             </form>
         </div>
     );
@@ -102,6 +104,7 @@ const styles = {
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
+        marginBottom: '10px'
     },
     errorMessage: {
         color: 'red',
