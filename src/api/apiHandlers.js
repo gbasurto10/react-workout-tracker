@@ -132,21 +132,6 @@ export async function fetchWorkoutSessions(clientId) {
     return response.json();
 }
 
-// Create New Workout Session
-export async function createWorkoutSession(sessionData) {
-    const response = await fetch(`${API_URL}/workout-sessions`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(sessionData),
-    });
-
-    if (!response.ok) {
-        throw new Error('Creating workout session failed');
-    }
-
-    return response.json();
-}
-
 // In your API handler file
 export async function assignTrainerToClient(clientUserId, trainerUserId) {
     const response = await fetch(`${API_URL}/assign-trainer`, {
@@ -178,10 +163,10 @@ export async function fetchSessionDetails(sessionId) {
 
 // Function to start a new workout session for a client
 export async function startNewWorkoutSession(clientId) {
-    const response = await fetch(`${API_URL}/workout-sessions`, {
+    const response = await fetch(`${API_URL}/start-workout-session`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ ClientID: clientId, Date: new Date().toISOString(), Description: 'New Workout Session' }),
+        body: JSON.stringify({ UserID: clientId }), // Corrected to UserID and removed Date and Description
     });
 
     if (!response.ok) {
