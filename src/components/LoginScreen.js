@@ -11,27 +11,24 @@ const LoginScreen = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-
+    
         try {
             const response = await loginUser(email, password);
-
+    
             if (response.success) {
                 console.log('Login successful:', response);
-                // Store the token, for example in localStorage (for simplicity)
                 localStorage.setItem('token', response.token);
-
-                // Redirect or update state here
-                // For example: navigate to a different screen or update user context
-
+    
+                // Navigate to ClientScreen
+                navigate('/clients');
             } else {
-                // If the response does not indicate success, set an error message
                 setError('Login failed. Please try again.');
             }
         } catch (err) {
-            // Handle errors (e.g., show error message)
             setError('Failed to log in. Please check your credentials.');
         }
     };
+    
 
     const handleRegisterClick = () => {
         navigate('/register');

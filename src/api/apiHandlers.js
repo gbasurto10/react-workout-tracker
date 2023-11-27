@@ -87,3 +87,34 @@ export async function deleteUserProfile(userId) {
 
     return response.json();
 }
+
+// Fetch Clients' Profiles
+export async function fetchClientsProfiles() {
+    const response = await fetch(`${API_URL}/clients`, {
+        method: 'GET',
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Fetching clients profiles failed');
+    }
+
+    return response.json();
+}
+
+
+// Create New Client Profile
+export async function createClientProfile(clientData) {
+    const response = await fetch(`${API_URL}/clients`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(clientData),
+    });
+
+    if (!response.ok) {
+        throw new Error('Creating client profile failed');
+    }
+
+    return response.json();
+}
+
