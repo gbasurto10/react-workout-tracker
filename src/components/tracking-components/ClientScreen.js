@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchClientsProfiles } from '../../api/apiHandlers';
 import { useNavigate } from 'react-router-dom';
+
 const ClientScreen = () => {
     const [clients, setClients] = useState([]);
     const navigate = useNavigate();
@@ -18,8 +19,12 @@ const ClientScreen = () => {
         }
     };
 
+    const navigateToClientWorkoutSessions = (clientId) => {
+        navigate(`/client-workout-sessions/${clientId}`); // Update the path as per your routing setup
+    };
+
     const navigateToCreateClient = () => {
-        navigate.push('/create-client'); // Replace '/create-client' with the actual path to your create client screen
+        navigate('/create-client'); // Replace with the actual path to your create client screen
     };
 
     return (
@@ -27,7 +32,7 @@ const ClientScreen = () => {
             <h1>Clients</h1>
             <ul>
                 {clients.map(client => (
-                    <li key={client.UserID}>
+                    <li key={client.UserID} onClick={() => navigateToClientWorkoutSessions(client.UserID)} style={{ cursor: 'pointer' }}>
                         {client.FirstName} {client.LastName}
                     </li>
                 ))}

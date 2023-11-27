@@ -118,9 +118,9 @@ export async function createClientProfile(clientData) {
     return response.json();
 }
 
-// Fetch Workout Sessions
-export async function fetchWorkoutSessions() {
-    const response = await fetch(`${API_URL}/workout-sessions`, {
+// Fetch Workout Sessions for a Client
+export async function fetchWorkoutSessions(clientId) {
+    const response = await fetch(`${API_URL}/workout-sessions/${clientId}`, {
         method: 'GET',
         headers: headers,
     });
