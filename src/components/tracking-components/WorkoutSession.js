@@ -1,7 +1,7 @@
 // WorkoutSession.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchSessionDetails } from '../../api/apiHandlers'; // Modify as needed
+import { fetchSessionDetails } from '../../api/apiHandlers';
 
 const WorkoutSession = () => {
     const { sessionId } = useParams();
@@ -11,6 +11,7 @@ const WorkoutSession = () => {
         const loadSessionDetails = async () => {
             try {
                 const response = await fetchSessionDetails(sessionId);
+                console.log('Session Details:', response); // Log the session details here
                 setSession(response);
             } catch (error) {
                 console.error('Error fetching session details:', error);
@@ -22,7 +23,7 @@ const WorkoutSession = () => {
     }, [sessionId]);
 
     if (!session) {
-        return <div>Loading...</div>; // or any other loading state
+        return <div>Loading...</div>;
     }
 
     return (
