@@ -26,12 +26,12 @@ export async function loginUser(email, password) {
 }
 
 // Register user 
-export async function registerUser(email, password) {
+export async function registerUser(email, password, userType) {
     console.log('Sending request with headers:', headers); 
     const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, userType }),
     });
 
     if (!response.ok) {

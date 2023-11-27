@@ -9,6 +9,7 @@ const RegisterScreen = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    const [userType, setUserType] = useState('trainer');
 
 
     const handleSubmit = async (e) => {
@@ -17,7 +18,7 @@ const RegisterScreen = () => {
         setSuccess(false);
 
         try {
-            const response = await registerUser(email, password);
+            const response = await registerUser(email, password, userType);
             if (response.success) {
                 setSuccess(true);
                 console.log('Registration successful:', response);

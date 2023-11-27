@@ -22,7 +22,7 @@ function App() {
           <Route exact path="/" element={<LoginScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
           <Route path="/clients" element={<ClientScreen />} />
-          <Route path="/client-workout-sessions/:clientId" element={<ClientWorkoutSessions />} /> {/* New route for client workout sessions */}
+          <Route path="/client-workout-sessions/:clientId" element={<ClientWorkoutSessions />} />
         </Routes>
       </div>
     </Router>
