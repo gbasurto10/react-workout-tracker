@@ -52,7 +52,7 @@ const WorkoutSession = () => {
                     <table>
                         <thead>
                             <tr>
-                                <th>Set Number</th>
+                                <th>Set</th>
                                 <th>Reps</th>
                                 <th>Weight</th>
                             </tr>
