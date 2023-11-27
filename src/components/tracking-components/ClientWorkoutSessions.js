@@ -10,7 +10,6 @@ const ClientWorkoutSessions = () => {
         const loadSessions = async () => {
             try {
                 const response = await fetchWorkoutSessions(clientId);
-                console.log('Fetched workout sessions:', response); // Log the fetched data
                 setSessions(response);
             } catch (error) {
                 console.error('Error fetching workout sessions:', error);
