@@ -118,3 +118,31 @@ export async function createClientProfile(clientData) {
     return response.json();
 }
 
+// Fetch Workout Sessions
+export async function fetchWorkoutSessions() {
+    const response = await fetch(`${API_URL}/workout-sessions`, {
+        method: 'GET',
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Fetching workout sessions failed');
+    }
+
+    return response.json();
+}
+
+// Create New Workout Session
+export async function createWorkoutSession(sessionData) {
+    const response = await fetch(`${API_URL}/workout-sessions`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(sessionData),
+    });
+
+    if (!response.ok) {
+        throw new Error('Creating workout session failed');
+    }
+
+    return response.json();
+}
