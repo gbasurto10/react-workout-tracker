@@ -175,3 +175,18 @@ export async function fetchSessionDetails(sessionId) {
 
     return response.json();
 }
+
+// Function to start a new workout session for a client
+export async function startNewWorkoutSession(clientId) {
+    const response = await fetch(`${API_URL}/workout-sessions`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ ClientID: clientId, Date: new Date().toISOString(), Description: 'New Workout Session' }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Starting new workout session failed');
+    }
+
+    return response.json();
+}
