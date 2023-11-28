@@ -105,8 +105,8 @@ const TrackWorkoutSession = () => {
 
 
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         try {
             // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
@@ -117,6 +117,9 @@ const TrackWorkoutSession = () => {
 
             console.log('Workout session saved and marked as finished');
             // Handle post-save actions (e.g., navigate or show a message)
+
+            navigate(`/client-workout-sessions/${clientId}`);
+
         } catch (error) {
             console.error('Error in saving or finishing workout session:', error);
             // Handle error
