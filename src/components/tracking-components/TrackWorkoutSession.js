@@ -1,6 +1,6 @@
 // TrackWorkoutSession.js
 import React, { useState, useEffect } from 'react';
-import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession } from '../../api/apiHandlers';
+import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession, deleteWorkoutSession } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,24 +36,24 @@ const TrackWorkoutSession = () => {
     const handleExerciseChange = (index, selectedExerciseID) => {
         console.log("Selected Exercise ID:", selectedExerciseID);
         console.log("Available Exercises:", availableExercises);
-    
+
         const newExercises = [...exercises];
         const selectedExercise = availableExercises.find(ex => ex.ExerciseID.toString() === selectedExerciseID);
-    
+
         if (!selectedExercise) {
             console.error("Selected exercise not found in available exercises");
             return;
         }
-    
-        newExercises[index] = { 
-            ...newExercises[index], 
-            id: selectedExerciseID, 
-            name: selectedExercise.Name, 
-            type: selectedExercise.Type 
+
+        newExercises[index] = {
+            ...newExercises[index],
+            id: selectedExerciseID,
+            name: selectedExercise.Name,
+            type: selectedExercise.Type
         };
         setExercises(newExercises);
     };
-    
+
 
 
     const handleSetChange = (exerciseIndex, setIndex, field, value) => {
@@ -111,10 +111,10 @@ const TrackWorkoutSession = () => {
             // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
             await saveWorkoutSession(sessionId, preparedExercises);
-    
+
             // Mark the session as finished
             await finishWorkoutSession(sessionId);
-    
+
             console.log('Workout session saved and marked as finished');
             // Handle post-save actions (e.g., navigate or show a message)
         } catch (error) {
@@ -122,7 +122,7 @@ const TrackWorkoutSession = () => {
             // Handle error
         }
     };
-    
+
 
     const handleAddNewExercise = async () => {
         const newExerciseName = prompt('Enter the name of the new exercise:');
@@ -183,6 +183,13 @@ const TrackWorkoutSession = () => {
             <button type="button" onClick={addExercise}>Add Exercise</button>
             <button type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
             <button type="submit" onClick={handleSubmit}>Save Workout</button>
+            <button onClick={() => {
+                if (window.confirm('Are you sure you want to delete this workout?')) {
+                    deleteWorkoutSession(sessionId, clientId)
+                        .then(clientId => navigate(`/client-workout-sessions/${clientId}`))
+                        .catch(err => console.error(err));
+                }
+            }}>Delete Workout</button>
         </form>
     );
 };

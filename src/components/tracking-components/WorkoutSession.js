@@ -1,11 +1,15 @@
 // WorkoutSession.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchSessionDetails } from '../../api/apiHandlers';
+import { useNavigate } from 'react-router-dom';
+
+import { fetchSessionDetails, deleteWorkoutSession } from '../../api/apiHandlers';
 
 const WorkoutSession = () => {
-    const { sessionId } = useParams();
+    // Inside your component
+    const { sessionId, clientId } = useParams();
     const [sessionDetails, setSessionDetails] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadSessionDetails = async () => {
@@ -69,6 +73,13 @@ const WorkoutSession = () => {
                     </table>
                 </div>
             ))}
+            <button onClick={() => {
+                if (window.confirm('Are you sure you want to delete this workout?')) {
+                    deleteWorkoutSession(sessionDetails.SessionID, clientId)
+                        .then(clientId => navigate(`/client-workout-sessions/${clientId}`))
+                        .catch(err => console.error(err));
+                }
+            }}>Delete Workout</button>
         </div>
     );
 };

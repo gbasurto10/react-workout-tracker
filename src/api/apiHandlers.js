@@ -43,8 +43,8 @@ export async function registerUser(email, password, userType) {
 
 
 // Fetch User Profile
-export async function fetchUserProfile(userId) {
-    const response = await fetch(`${API_URL}/profiles/${userId}`, {
+export async function fetchUserProfile(clientId) {
+    const response = await fetch(`${API_URL}/clients/${clientId}`, {
         method: 'GET',
         headers: headers,
     });
@@ -233,4 +233,19 @@ export async function finishWorkoutSession(sessionId) {
     }
 
     return response.json();
+}
+
+// Delete a workout session
+export async function deleteWorkoutSession(sessionId, clientId) {
+    const response = await fetch(`${API_URL}/delete-workout-session/${sessionId}`, {
+        method: 'DELETE',
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to delete workout session');
+    }
+
+    await response.json();
+    return clientId;
 }
