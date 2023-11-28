@@ -19,7 +19,7 @@ export async function loginUser(email, password) {
     });
 
     if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error('gin failed');
     }
 
     return response.json();
@@ -171,6 +171,51 @@ export async function startNewWorkoutSession(clientId) {
 
     if (!response.ok) {
         throw new Error('Starting new workout session failed');
+    }
+
+    return response.json();
+}
+
+export async function fetchExercises() {
+    const response = await fetch(`${API_URL}/exercises`, {
+        method: 'GET',
+        headers: headers
+    });
+
+    if (!response.ok) {
+        throw new Error('Fetching exercises failed');
+    }
+
+    return response.json();
+}
+
+export async function createNewExercise(exerciseData) {
+    const response = await fetch(`${API_URL}/exercises`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(exerciseData)
+    });
+
+    if (!response.ok) {
+        throw new Error('Creating new exercise failed');
+    }
+
+    return response.json();
+}
+
+// Save a workout session
+export async function saveWorkoutSession(sessionId, exercises) {
+
+    console.log("Sending to server:", { sessionId, exercises });
+    
+    const response = await fetch(`${API_URL}/save-workout-session/${sessionId}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify({ exercises }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Saving workout session failed');
     }
 
     return response.json();

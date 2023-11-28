@@ -22,9 +22,14 @@ const ClientWorkoutSessions = () => {
         loadSessions();
     }, [clientId]);
 
-    const handleSessionClick = (sessionId) => {
-        navigate(`/workout-session/${sessionId}`);
+    const handleSessionClick = (session) => {
+        if (session.isFinished) {
+            navigate(`/workout-session/${session.SessionID}`);
+        } else {
+            navigate(`/track-workout-session/${session.SessionID}`);
+        }
     };
+
 
     const handleStartNewWorkout = async () => {
         try {
@@ -38,18 +43,20 @@ const ClientWorkoutSessions = () => {
     };
 
 
-    return(
+    return (
         <div>
             <h2>Workout Sessions for Client {clientId}</h2>
             <button onClick={handleStartNewWorkout}>Start New Workout</button>
             <ul>
                 {sessions.map(session => (
-                    <li key={session.SessionID} onClick={() => handleSessionClick(session.SessionID)} style={{ cursor: 'pointer' }}>
+                    <li key={session.SessionID} onClick={() => handleSessionClick(session)} style={{ cursor: 'pointer' }}>
                         Date: {new Date(session.Date).toLocaleDateString()},
-                        Description: {session.Description}
+                        Description: {session.Description},
+                        Status: {session.isFinished ? "Finished" : "In Progress"}
                     </li>
                 ))}
             </ul>
+
         </div>
     );
 };
