@@ -1,6 +1,6 @@
 // TrackWorkoutSession.js
 import React, { useState, useEffect } from 'react';
-import { fetchExercises, createNewExercise, saveWorkoutSession } from '../../api/apiHandlers';
+import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 
 const defaultExercise = {
@@ -100,16 +100,21 @@ const TrackWorkoutSession = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Transform the data before sending
+            // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
             await saveWorkoutSession(sessionId, preparedExercises);
-            console.log('Workout session saved successfully');
+    
+            // Mark the session as finished
+            await finishWorkoutSession(sessionId);
+    
+            console.log('Workout session saved and marked as finished');
             // Handle post-save actions (e.g., navigate or show a message)
         } catch (error) {
-            console.error('Error saving workout session:', error);
+            console.error('Error in saving or finishing workout session:', error);
             // Handle error
         }
     };
+    
 
     const handleAddNewExercise = async () => {
         const newExerciseName = prompt('Enter the name of the new exercise:');

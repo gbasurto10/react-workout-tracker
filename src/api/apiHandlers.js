@@ -207,7 +207,7 @@ export async function createNewExercise(exerciseData) {
 export async function saveWorkoutSession(sessionId, exercises) {
 
     console.log("Sending to server:", { sessionId, exercises });
-    
+
     const response = await fetch(`${API_URL}/save-workout-session/${sessionId}`, {
         method: 'PUT',
         headers: headers,
@@ -216,6 +216,20 @@ export async function saveWorkoutSession(sessionId, exercises) {
 
     if (!response.ok) {
         throw new Error('Saving workout session failed');
+    }
+
+    return response.json();
+}
+
+// Mark a workout session as finished
+export async function finishWorkoutSession(sessionId) {
+    const response = await fetch(`${API_URL}/workout-session/${sessionId}/finish`, {
+        method: 'PUT',
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to mark workout session as finished');
     }
 
     return response.json();

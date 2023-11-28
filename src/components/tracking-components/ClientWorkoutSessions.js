@@ -12,12 +12,16 @@ const ClientWorkoutSessions = () => {
         const loadSessions = async () => {
             try {
                 const response = await fetchWorkoutSessions(clientId);
-                setSessions(response);
+                console.log('Fetched workout sessions:', response);
+                setSessions(response.map(session => ({
+                  ...session,
+                  isFinished: Boolean(session.IsFinished) // This converts 1 or 0 to true/false
+                })));
             } catch (error) {
                 console.error('Error fetching workout sessions:', error);
-                // Handle error (e.g., show error message)
             }
         };
+        
 
         loadSessions();
     }, [clientId]);
