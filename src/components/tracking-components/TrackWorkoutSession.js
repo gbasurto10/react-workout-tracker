@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 const defaultExercise = {
     name: '',
@@ -13,6 +15,12 @@ const TrackWorkoutSession = () => {
     const [exercises, setExercises] = useState([defaultExercise]);
     const [availableExercises, setAvailableExercises] = useState([]);
     const { sessionId } = useParams();
+    const { clientId } = useParams();
+    const navigate = useNavigate();
+
+
+    console.log('Fetched clientId:', clientId);
+    console.log('Fetched sessionId:', sessionId);
 
     // Function to load exercises
     const loadExercises = async () => {

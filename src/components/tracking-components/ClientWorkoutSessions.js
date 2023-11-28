@@ -9,10 +9,10 @@ const ClientWorkoutSessions = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log("Client Id: ", clientId)
         const loadSessions = async () => {
             try {
                 const response = await fetchWorkoutSessions(clientId);
-                console.log('Fetched workout sessions:', response);
                 setSessions(response.map(session => ({
                   ...session,
                   isFinished: Boolean(session.IsFinished) // This converts 1 or 0 to true/false
@@ -26,11 +26,12 @@ const ClientWorkoutSessions = () => {
         loadSessions();
     }, [clientId]);
 
+
     const handleSessionClick = (session) => {
         if (session.isFinished) {
             navigate(`/workout-session/${session.SessionID}`);
         } else {
-            navigate(`/track-workout-session/${session.SessionID}`);
+            navigate(`/track-workout-session/${session.SessionID}/${clientId}`);
         }
     };
 
@@ -39,7 +40,7 @@ const ClientWorkoutSessions = () => {
         try {
             const response = await startNewWorkoutSession(clientId);
             // Navigate to the TrackWorkoutSession component with the new session ID
-            navigate(`/track-workout-session/${response.SessionID}`);
+            navigate(`/track-workout-session/${response.SessionID}/${clientId}`);
         } catch (error) {
             console.error('Error starting new workout session:', error);
             // Handle error (e.g., show error message)

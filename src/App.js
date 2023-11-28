@@ -26,7 +26,7 @@ function App() {
           <Route path="/clients" element={<ClientScreen />} />
           <Route path="/client-workout-sessions/:clientId" element={<ClientWorkoutSessions />} />
           <Route path="/workout-session/:sessionId" element={<WorkoutSession />} />
-          <Route path="/track-workout-session/:sessionId" element={<TrackWorkoutSession />} />
+          <Route path="/track-workout-session/:sessionId/:clientId" element={<TrackWorkoutSession />} />
         </Routes>
       </div>
     </Router>
