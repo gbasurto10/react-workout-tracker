@@ -195,13 +195,6 @@ const TrackWorkoutSession = () => {
                             <option key={index} value={ex.ExerciseID}>{ex.Name}</option>
                         ))}
                     </select>
-
-                    <input
-                        type="text"
-                        placeholder="Type"
-                        value={exercise.type}
-                        onChange={(e) => handleExerciseChange(exerciseIndex, 'type', e.target.value)}
-                    />
                     <button type="button" onClick={() => removeExercise(exerciseIndex)}>
                         Remove Exercise
                     </button>
