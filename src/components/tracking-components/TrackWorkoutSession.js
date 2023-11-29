@@ -19,10 +19,6 @@ const TrackWorkoutSession = () => {
     const { clientId } = useParams();
     const navigate = useNavigate();
 
-
-    console.log('Fetched clientId:', clientId);
-    console.log('Fetched sessionId:', sessionId);
-
     // Fetch session exercises when the component mounts
     useEffect(() => {
         const loadSessionExercises = async () => {
@@ -56,6 +52,7 @@ const TrackWorkoutSession = () => {
             // Sort sets for each exercise by SessionExerciseID
             exercisesArray.forEach(exercise => {
               exercise.sets.sort((a, b) => a.sessionExerciseID - b.sessionExerciseID);
+              console.log(`Existing sets for exercise ${exercise.name}:`, exercise.sets);
             });
       
             setExercises(exercisesArray);
