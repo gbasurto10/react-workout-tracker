@@ -1,6 +1,6 @@
 // TrackWorkoutSession.js
 import React, { useState, useEffect } from 'react';
-import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession, deleteWorkoutSession } from '../../api/apiHandlers';
+import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession, deleteWorkoutSession, fetchSessionExercises } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ const defaultExercise = {
 };
 
 const TrackWorkoutSession = () => {
+    const [sessionDetails, setSessionDetails] = useState(null);
     const [exercises, setExercises] = useState([defaultExercise]);
     const [availableExercises, setAvailableExercises] = useState([]);
     const { sessionId } = useParams();
@@ -21,6 +22,53 @@ const TrackWorkoutSession = () => {
 
     console.log('Fetched clientId:', clientId);
     console.log('Fetched sessionId:', sessionId);
+
+    // Fetch session exercises when the component mounts
+    useEffect(() => {
+        const loadSessionExercises = async () => {
+          try {
+            const sessionExercisesData = await fetchSessionExercises(sessionId);
+      
+            // Group sets by ExerciseID
+            const groupedExercises = sessionExercisesData.reduce((acc, current) => {
+              const { ExerciseID, Name, Type, SessionExerciseID, Reps, Weight } = current;
+              // If the exercise hasn't been added to the accumulator, add it
+              if (!acc[ExerciseID]) {
+                acc[ExerciseID] = {
+                  id: ExerciseID,
+                  name: Name,
+                  type: Type,
+                  sets: [],
+                };
+              }
+              // Push the current set to the exercise entry
+              acc[ExerciseID].sets.push({
+                sessionExerciseID: SessionExerciseID, // Use SessionExerciseID to maintain the unique identifier for each set
+                reps: Reps,
+                weight: Weight,
+              });
+              return acc;
+            }, {});
+      
+            // Convert the grouped exercises object back to an array
+            const exercisesArray = Object.values(groupedExercises);
+      
+            // Sort sets for each exercise by SessionExerciseID
+            exercisesArray.forEach(exercise => {
+              exercise.sets.sort((a, b) => a.sessionExerciseID - b.sessionExerciseID);
+            });
+      
+            setExercises(exercisesArray);
+          } catch (err) {
+            console.error('Error loading session exercises:', err);
+          }
+        };
+      
+        loadSessionExercises();
+      }, [sessionId]);
+      
+
+
 
     // Function to load exercises
     const loadExercises = async () => {
@@ -56,14 +104,14 @@ const TrackWorkoutSession = () => {
 
 
 
-    const handleSetChange = (exerciseIndex, setIndex, field, value) => {
-        const newExercises = [...exercises];
-        const sets = newExercises[exerciseIndex].sets.map((set, i) =>
-            i === setIndex ? { ...set, [field]: value } : set
-        );
-        newExercises[exerciseIndex].sets = sets;
-        setExercises(newExercises);
-    };
+    function handleSetChange(exerciseIndex, setIndex, field, value) {
+        setExercises(prevExercises => {
+            // Create a deep copy of the exercises
+            const newExercises = JSON.parse(JSON.stringify(prevExercises));
+            newExercises[exerciseIndex].sets[setIndex][field] = value;
+            return newExercises;
+        });
+    }
 
     const addExercise = () => {
         setExercises([...exercises, defaultExercise]);
@@ -150,6 +198,7 @@ const TrackWorkoutSession = () => {
                             <option key={index} value={ex.ExerciseID}>{ex.Name}</option>
                         ))}
                     </select>
+
                     <input
                         type="text"
                         placeholder="Type"
@@ -164,13 +213,13 @@ const TrackWorkoutSession = () => {
                             <input
                                 type="number"
                                 placeholder="Reps"
-                                value={set.reps}
+                                value={set.reps || ''}
                                 onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
                             />
                             <input
                                 type="number"
                                 placeholder="Weight"
-                                value={set.weight}
+                                value={set.weight || ''}
                                 onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
                             />
                             <button type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>

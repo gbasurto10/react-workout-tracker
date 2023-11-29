@@ -161,6 +161,21 @@ export async function fetchSessionDetails(sessionId) {
     return response.json();
 }
 
+// Fetch Session Exercises
+export const fetchSessionExercises = async (sessionId) => {
+    const response = await fetch(`${API_URL}/sessionExercises/${sessionId}`, {
+        method: 'GET',
+        headers: headers
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+
 // Function to start a new workout session for a client
 export async function startNewWorkoutSession(clientId) {
     const response = await fetch(`${API_URL}/start-workout-session`, {
@@ -248,4 +263,18 @@ export async function deleteWorkoutSession(sessionId, clientId) {
 
     await response.json();
     return clientId;
+}
+
+// Update a workout session
+export async function updateWorkoutSession(sessionId) {
+    const response = await fetch(`${API_URL}/update-workout-session/${sessionId}`, {
+        method: 'PUT',
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to update workout session');
+    }
+
+    return response.json();
 }

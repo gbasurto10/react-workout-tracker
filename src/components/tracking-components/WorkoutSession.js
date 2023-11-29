@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { fetchSessionDetails, deleteWorkoutSession } from '../../api/apiHandlers';
+import { fetchSessionDetails, deleteWorkoutSession, updateWorkoutSession } from '../../api/apiHandlers';
 
 const WorkoutSession = () => {
     // Inside your component
@@ -80,6 +80,11 @@ const WorkoutSession = () => {
                         .catch(err => console.error(err));
                 }
             }}>Delete Workout</button>
+            <button onClick={() => {
+                updateWorkoutSession(sessionDetails.SessionID)
+                    .then(() => navigate(`/track-workout-session/${sessionDetails.SessionID}/${clientId}`))
+                    .catch(err => console.error(err));
+            }}>Update Workout</button>
         </div>
     );
 };
