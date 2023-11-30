@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 const RegisterScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [userType, setUserType] = useState('trainer');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
-    const [userType, setUserType] = useState('trainer');
 
 
     const handleSubmit = async (e) => {
@@ -18,7 +20,7 @@ const RegisterScreen = () => {
         setSuccess(false);
 
         try {
-            const response = await registerUser(email, password, userType);
+            const response = await registerUser(email, password, userType, firstName, lastName);
             if (response.success) {
                 setSuccess(true);
                 console.log('Registration successful:', response);
@@ -43,6 +45,22 @@ const RegisterScreen = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
+                        style={styles.input}
+                    />
+                    <label style={styles.label}>First Name</label>
+                    <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        style={styles.input}
+                    />
+                    <label style={styles.label}>Last Name</label>
+                    <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         required
                         style={styles.input}
                     />

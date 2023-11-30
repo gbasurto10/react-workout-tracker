@@ -25,13 +25,12 @@ export async function loginUser(email, password) {
     return response.json();
 }
 
-// Register user 
-export async function registerUser(email, password, userType) {
-    console.log('Sending request with headers:', headers); 
+export async function registerUser(email, password, userType, firstName, lastName) {
+    console.log('Sending request with headers:', headers);
     const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ email, password, userType }),
+        body: JSON.stringify({ email, password, userType, firstName, lastName }),
     });
 
     if (!response.ok) {
@@ -40,6 +39,7 @@ export async function registerUser(email, password, userType) {
 
     return response.json();
 }
+
 
 
 // Fetch User Profile
@@ -117,6 +117,28 @@ export async function createClientProfile(clientData) {
 
     return response.json();
 }
+
+
+// Fetch Trainer Profiles
+export async function fetchTrainers() {
+    try {
+        const response = await fetch(`${API_URL}/users/trainers`, {
+            method: 'GET',
+            headers: headers,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch trainers');
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching trainers:', error);
+        throw error;
+    }
+}
+
+
 
 // Fetch Workout Sessions for a Client
 export async function fetchWorkoutSessions(clientId) {

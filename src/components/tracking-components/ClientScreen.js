@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const ClientScreen = () => {
     const [clients, setClients] = useState([]);
     const navigate = useNavigate();
+    const trainerId = localStorage.getItem('userId');
+
 
     useEffect(() => {
         fetchClients();
@@ -13,7 +15,10 @@ const ClientScreen = () => {
     const fetchClients = async () => {
         try {
             const data = await fetchClientsProfiles();
-            setClients(data);
+            const trainerIdNumber = Number(trainerId); // Convert trainerId to a number
+            const filteredClients = data.filter(client => client.TrainerUserID === trainerIdNumber); // Filter clients
+            setClients(filteredClients);
+            console.log("Filtered client data:", filteredClients)
         } catch (error) {
             console.error('Error fetching clients:', error);
         }
