@@ -151,10 +151,18 @@ const TrackWorkoutSession = () => {
     }
 
     const addExercise = () => {
-        setExercises([...exercises, defaultExercise]);
+        const newExercise = {
+            name: '',
+            type: '',
+            sets: [{ reps: '', weight: '' }]  // Initialize with one set having empty reps and weight
+        };
+    
+        setExercises([...exercises, newExercise]);
     };
+    
 
     const addSet = (exerciseIndex) => {
+        console.log("Current sets for exercise at index", exerciseIndex, ":", exercises[exerciseIndex].sets);
         const newExercises = [...exercises];
         newExercises[exerciseIndex].sets.push({ reps: '', weight: '' });
         setExercises(newExercises);
