@@ -6,6 +6,7 @@ import ClientScreen from './components/tracking-components/ClientScreen';
 import ClientWorkoutSessions from './components/tracking-components/ClientWorkoutSessions';
 import WorkoutSession from './components/tracking-components/WorkoutSession';
 import TrackWorkoutSession from './components/tracking-components/TrackWorkoutSession';
+import CreateClient from './components/tracking-components/CreateClient';
 
 function BackButton() {
   let navigate = useNavigate();
@@ -71,6 +72,7 @@ function Main() {
         <Route path="/workout-session/:sessionId/:clientId" element={<WorkoutSession />} />
         <Route path="/track-workout-session/:sessionId/:clientId" element={<TrackWorkoutSession />} />
         <Route path="/ClientWorkoutSessions" element={<ClientWorkoutSessions />} />
+        <Route path="/create-client" element={<CreateClient />} />
       </Routes>
     </>
   );

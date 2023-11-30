@@ -11,14 +11,20 @@ const LoginScreen = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-    
+
         try {
             const response = await loginUser(email, password);
-    
+
             if (response.success) {
                 console.log('Login successful:', response);
                 localStorage.setItem('token', response.token);
-    
+                localStorage.setItem('userId', response.userId);
+                localStorage.setItem('userType', response.userType);
+
+                console.log('Token:', response.token);
+                console.log('UserId:', response.userId);
+                console.log('UserType:', response.userType);
+
                 // Navigate to ClientScreen
                 navigate('/clients');
             } else {
@@ -28,7 +34,7 @@ const LoginScreen = () => {
             setError('Failed to log in. Please check your credentials.');
         }
     };
-    
+
 
     const handleRegisterClick = () => {
         navigate('/register');
