@@ -1,6 +1,14 @@
 // TrackWorkoutSession.js
 import React, { useState, useEffect } from 'react';
-import { fetchExercises, createNewExercise, saveWorkoutSession, finishWorkoutSession, deleteWorkoutSession, fetchSessionExercises } from '../../api/apiHandlers';
+import {
+    fetchExercises,
+    createNewExercise,
+    saveWorkoutSession,
+    finishWorkoutSession,
+    deleteWorkoutSession,
+    fetchSessionExercises,
+    fetchExerciseHistory
+} from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,6 +28,8 @@ const TrackWorkoutSession = () => {
     const { clientId } = useParams();
     const navigate = useNavigate();
     const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
+    const [exerciseHistory, setExerciseHistory] = useState([]);
+
 
 
     // Mock exercise history data
@@ -210,9 +220,40 @@ const TrackWorkoutSession = () => {
         }
     };
 
-    const toggleSlideOver = () => {
+    const toggleSlideOver = async (exerciseId) => {
+        if (!isSlideOverOpen) {
+            await loadExerciseHistory(exerciseId);
+            console.log("Exercise History:", exerciseHistory);
+        }
         setIsSlideOverOpen(!isSlideOverOpen);
     };
+
+
+
+    // Fetch Exercise History
+    const loadExerciseHistory = async (exerciseId) => {
+        try {
+            const historyData = await fetchExerciseHistory(clientId, exerciseId);
+            setExerciseHistory(historyData);
+        } catch (err) {
+            console.error('Error loading exercise history:', err);
+            // Optionally, handle the error in the UI, e.g., show an error message
+        }
+    };
+
+    const groupByDate = (history) => {
+        return history.reduce((acc, item) => {
+            const date = new Date(item.Date).toLocaleDateString();
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(item);
+            return acc;
+        }, {});
+    };
+
+    const groupedHistory = groupByDate(exerciseHistory);
+
 
 
 
@@ -231,7 +272,9 @@ const TrackWorkoutSession = () => {
                         ))}
                     </select>
                     <button type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
-                    <button type="button" onClick={toggleSlideOver}>View Exercise History</button>
+                    <button type="button" onClick={() => toggleSlideOver(exercise.id)}>
+                        View Exercise History
+                    </button>
                     {exercise.sets.map((set, setIndex) => (
                         <div key={setIndex} className="set-section">
                             <input
@@ -265,18 +308,24 @@ const TrackWorkoutSession = () => {
 
             {isSlideOverOpen && (
                 <div style={{ ...slideOverStyles, ...(isSlideOverOpen ? slideOverOpenStyles : {}) }}>
-                    {/* Slide-over content */}
                     <h3>Exercise History</h3>
-                    <ul>
-                        {mockExerciseHistory.map((item, index) => (
-                            <li key={index}>
-                                <strong>{item.date}</strong>: {item.exercise} - {item.sets} sets of {item.reps} reps at {item.weight} lbs
-                            </li>
-                        ))}
-                    </ul>
+                    {Object.keys(groupedHistory).map(date => (
+                        <div key={date}>
+                            <h4>{date}</h4>
+                            <ul>
+                                {groupedHistory[date].map((item, index) => (
+                                    <li key={index}>
+                                        <strong>Set {item.SetNumber}:</strong> {item.Reps} reps at {item.Weight} lbs
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                     <button onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
+
+
         </form>
     );
 

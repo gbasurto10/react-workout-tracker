@@ -300,3 +300,23 @@ export async function updateWorkoutSession(sessionId) {
 
     return response.json();
 }
+
+// Fetch Exercise History for a Specific Exercise
+export async function fetchExerciseHistory(userId, exerciseId) {
+    try {
+        const response = await fetch(`${API_URL}/client/${userId}/exercise-history/${exerciseId}`, {
+            method: 'GET',
+            headers: headers,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch exercise history');
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching exercise history:', error);
+        throw error;
+    }
+}
+
