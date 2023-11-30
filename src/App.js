@@ -58,7 +58,7 @@ function Main() {
         <nav style={navStyles}>
           <div>
             {!isClientScreen && <BackButton />}
-            {!isClientScreen && <Link to="/clients">Clients</Link>}
+            {!isClientScreen && <Link to="/clients">Home</Link>}
           </div>
           <LogoutButton />
         </nav>

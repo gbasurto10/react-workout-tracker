@@ -62,7 +62,6 @@ const ClientWorkoutSessions = () => {
                 {sessions.map(session => (
                     <li key={session.SessionID} onClick={() => handleSessionClick(session)} style={{ cursor: 'pointer' }}>
                         Date: {new Date(session.Date).toLocaleDateString()},
-                        Description: {session.Description},
                         Status: {session.isFinished ? "Finished" : "In Progress"}
                     </li>
                 ))}
