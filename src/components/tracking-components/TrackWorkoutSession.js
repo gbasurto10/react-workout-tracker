@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 
+
 const defaultExercise = {
     name: '',
     type: '',
@@ -18,52 +19,81 @@ const TrackWorkoutSession = () => {
     const { sessionId } = useParams();
     const { clientId } = useParams();
     const navigate = useNavigate();
+    const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
+
+
+    // Mock exercise history data
+    const mockExerciseHistory = [
+        { date: "2023-03-01", exercise: "Squats", sets: 3, reps: 12, weight: 100 },
+        { date: "2023-03-05", exercise: "Deadlift", sets: 4, reps: 10, weight: 150 },
+    ];
+    const slideOverStyles = {
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        width: '300px',
+        height: '100%',
+        backgroundColor: 'white',
+        boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.5)',
+        padding: '20px',
+        boxSizing: 'border-box',
+        transform: 'translateX(100%)',
+        transition: 'transform 0.3s ease-in-out',
+    };
+
+    const slideOverOpenStyles = {
+        transform: 'translateX(0)',
+    };
+
+
+
+
 
     // Fetch session exercises when the component mounts
     useEffect(() => {
         const loadSessionExercises = async () => {
-          try {
-            const sessionExercisesData = await fetchSessionExercises(sessionId);
-      
-            // Group sets by ExerciseID
-            const groupedExercises = sessionExercisesData.reduce((acc, current) => {
-              const { ExerciseID, Name, Type, SessionExerciseID, Reps, Weight } = current;
-              // If the exercise hasn't been added to the accumulator, add it
-              if (!acc[ExerciseID]) {
-                acc[ExerciseID] = {
-                  id: ExerciseID,
-                  name: Name,
-                  type: Type,
-                  sets: [],
-                };
-              }
-              // Push the current set to the exercise entry
-              acc[ExerciseID].sets.push({
-                sessionExerciseID: SessionExerciseID, // Use SessionExerciseID to maintain the unique identifier for each set
-                reps: Reps,
-                weight: Weight,
-              });
-              return acc;
-            }, {});
-      
-            // Convert the grouped exercises object back to an array
-            const exercisesArray = Object.values(groupedExercises);
-      
-            // Sort sets for each exercise by SessionExerciseID
-            exercisesArray.forEach(exercise => {
-              exercise.sets.sort((a, b) => a.sessionExerciseID - b.sessionExerciseID);
-              console.log(`Existing sets for exercise ${exercise.name}:`, exercise.sets);
-            });
-      
-            setExercises(exercisesArray);
-          } catch (err) {
-            console.error('Error loading session exercises:', err);
-          }
+            try {
+                const sessionExercisesData = await fetchSessionExercises(sessionId);
+
+                // Group sets by ExerciseID
+                const groupedExercises = sessionExercisesData.reduce((acc, current) => {
+                    const { ExerciseID, Name, Type, SessionExerciseID, Reps, Weight } = current;
+                    // If the exercise hasn't been added to the accumulator, add it
+                    if (!acc[ExerciseID]) {
+                        acc[ExerciseID] = {
+                            id: ExerciseID,
+                            name: Name,
+                            type: Type,
+                            sets: [],
+                        };
+                    }
+                    // Push the current set to the exercise entry
+                    acc[ExerciseID].sets.push({
+                        sessionExerciseID: SessionExerciseID, // Use SessionExerciseID to maintain the unique identifier for each set
+                        reps: Reps,
+                        weight: Weight,
+                    });
+                    return acc;
+                }, {});
+
+                // Convert the grouped exercises object back to an array
+                const exercisesArray = Object.values(groupedExercises);
+
+                // Sort sets for each exercise by SessionExerciseID
+                exercisesArray.forEach(exercise => {
+                    exercise.sets.sort((a, b) => a.sessionExerciseID - b.sessionExerciseID);
+                    console.log(`Existing sets for exercise ${exercise.name}:`, exercise.sets);
+                });
+
+                setExercises(exercisesArray);
+            } catch (err) {
+                console.error('Error loading session exercises:', err);
+            }
         };
-      
+
         loadSessionExercises();
-      }, [sessionId]);
-      
+    }, [sessionId]);
+
 
 
 
@@ -180,26 +210,30 @@ const TrackWorkoutSession = () => {
         }
     };
 
+    const toggleSlideOver = () => {
+        setIsSlideOverOpen(!isSlideOverOpen);
+    };
+
+
 
     return (
         <form onSubmit={handleSubmit}>
             <h2>Track Workout Session</h2>
             {exercises.map((exercise, exerciseIndex) => (
-                <div key={exerciseIndex}>
+                <div key={exerciseIndex} className="exercise-section">
                     <select
                         value={exercise.id || ''}
                         onChange={(e) => handleExerciseChange(exerciseIndex, e.target.value)}
                     >
                         <option value="">Select an exercise</option>
-                        {availableExercises.map((ex, index) => (
-                            <option key={index} value={ex.ExerciseID}>{ex.Name}</option>
+                        {availableExercises.map((ex) => (
+                            <option key={ex.ExerciseID} value={ex.ExerciseID}>{ex.Name}</option>
                         ))}
                     </select>
-                    <button type="button" onClick={() => removeExercise(exerciseIndex)}>
-                        Remove Exercise
-                    </button>
+                    <button type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
+                    <button type="button" onClick={toggleSlideOver}>View Exercise History</button>
                     {exercise.sets.map((set, setIndex) => (
-                        <div key={setIndex}>
+                        <div key={setIndex} className="set-section">
                             <input
                                 type="number"
                                 placeholder="Reps"
@@ -212,28 +246,41 @@ const TrackWorkoutSession = () => {
                                 value={set.weight || ''}
                                 onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
                             />
-                            <button type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>
-                                Remove Set
-                            </button>
+                            <button type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
                         </div>
                     ))}
-                    <button type="button" onClick={() => addSet(exerciseIndex)}>
-                        Add Set
-                    </button>
+                    <button type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
                 </div>
             ))}
             <button type="button" onClick={addExercise}>Add Exercise</button>
             <button type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
-            <button type="submit" onClick={handleSubmit}>Save Workout</button>
-            <button onClick={() => {
+            <button type="submit">Save Workout</button>
+            <button type="button" onClick={() => {
                 if (window.confirm('Are you sure you want to delete this workout?')) {
                     deleteWorkoutSession(sessionId, clientId)
-                        .then(clientId => navigate(`/client-workout-sessions/${clientId}`))
+                        .then(() => navigate(`/client-workout-sessions/${clientId}`))
                         .catch(err => console.error(err));
                 }
             }}>Delete Workout</button>
+
+            {isSlideOverOpen && (
+                <div style={{ ...slideOverStyles, ...(isSlideOverOpen ? slideOverOpenStyles : {}) }}>
+                    {/* Slide-over content */}
+                    <h3>Exercise History</h3>
+                    <ul>
+                        {mockExerciseHistory.map((item, index) => (
+                            <li key={index}>
+                                <strong>{item.date}</strong>: {item.exercise} - {item.sets} sets of {item.reps} reps at {item.weight} lbs
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={toggleSlideOver}>Close</button>
+                </div>
+            )}
         </form>
     );
+
 };
+
 
 export default TrackWorkoutSession;
