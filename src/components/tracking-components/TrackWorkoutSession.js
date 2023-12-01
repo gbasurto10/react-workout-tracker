@@ -43,6 +43,7 @@ const TrackWorkoutSession = () => {
         right: 0,
         width: '300px',
         height: '100%',
+        overflowY: 'auto',
         backgroundColor: 'white',
         boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.5)',
         padding: '20px',
@@ -50,6 +51,7 @@ const TrackWorkoutSession = () => {
         transform: 'translateX(100%)',
         transition: 'transform 0.3s ease-in-out',
     };
+    
 
     const slideOverOpenStyles = {
         transform: 'translateX(0)',
