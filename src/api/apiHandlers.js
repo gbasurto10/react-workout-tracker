@@ -172,6 +172,7 @@ export async function assignTrainerToClient(clientUserId, trainerUserId) {
 // Fetch Details of a Specific Workout Session
 export async function fetchSessionDetails(sessionId) {
     const response = await fetch(`${API_URL}/workout-session/${sessionId}`, {
+        
         method: 'GET',
         headers: headers,
     });
@@ -180,7 +181,10 @@ export async function fetchSessionDetails(sessionId) {
         throw new Error('Fetching workout session details failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log("Fetched Session Details: ", data); // Log the JSON response
+
+    return data;
 }
 
 // Fetch Session Exercises
@@ -243,7 +247,7 @@ export async function createNewExercise(exerciseData) {
 // Save a workout session
 export async function saveWorkoutSession(sessionId, exercises) {
 
-    console.log("Preparing to send to server:", { sessionId, exercises });
+    console.log("Sending to server:", { sessionId, exercises });
 
     const response = await fetch(`${API_URL}/save-workout-session/${sessionId}`, {
         method: 'PUT',
