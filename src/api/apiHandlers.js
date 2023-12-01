@@ -243,7 +243,7 @@ export async function createNewExercise(exerciseData) {
 // Save a workout session
 export async function saveWorkoutSession(sessionId, exercises) {
 
-    console.log("Sending to server:", { sessionId, exercises });
+    console.log("Preparing to send to server:", { sessionId, exercises });
 
     const response = await fetch(`${API_URL}/save-workout-session/${sessionId}`, {
         method: 'PUT',

@@ -29,6 +29,9 @@ const TrackWorkoutSession = () => {
     const navigate = useNavigate();
     const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
     const [exerciseHistory, setExerciseHistory] = useState([]);
+    const [currentSupersetId, setCurrentSupersetId] = useState(1);
+    const [newSupersetSize, setNewSupersetSize] = useState(0);
+
 
 
 
@@ -51,7 +54,7 @@ const TrackWorkoutSession = () => {
         transform: 'translateX(100%)',
         transition: 'transform 0.3s ease-in-out',
     };
-    
+
 
     const slideOverOpenStyles = {
         transform: 'translateX(0)',
@@ -154,14 +157,13 @@ const TrackWorkoutSession = () => {
 
     const addExercise = () => {
         const newExercise = {
-            name: '',
-            type: '',
-            sets: [{ reps: '', weight: '' }]  // Initialize with one set having empty reps and weight
+            ...defaultExercise,
+            sets: [{ reps: '', weight: '' }]
         };
-    
+
         setExercises([...exercises, newExercise]);
     };
-    
+
 
     const addSet = (exerciseIndex) => {
         console.log("Current sets for exercise at index", exerciseIndex, ":", exercises[exerciseIndex].sets);
@@ -183,20 +185,17 @@ const TrackWorkoutSession = () => {
 
     // Prepare exercises for saving
     function prepareExercisesForSave() {
-        return exercises.map((exercise, exerciseIndex) => {
-            // Assuming you have an exercise ID stored in your state
-            const exerciseID = exercise.id; // Replace with actual ID from your state
-
-            return {
-                ExerciseID: exerciseID,
-                sets: exercise.sets.map((set, setIndex) => ({
-                    SetNumber: setIndex + 1, // Example of generating a SetNumber
-                    Reps: set.reps,
-                    Weight: set.weight
-                }))
-            };
-        });
+        return exercises.map(exercise => ({
+            ExerciseID: exercise.id,
+            SupersetID: exercise.supersetId || null,
+            sets: exercise.sets.map((set, index) => ({
+                SetNumber: index + 1,  // Assign set number based on the index
+                Reps: set.reps,
+                Weight: set.weight
+            }))
+        }));
     }
+
 
 
 
@@ -264,14 +263,23 @@ const TrackWorkoutSession = () => {
 
     const groupedHistory = groupByDate(exerciseHistory);
 
+    const handleCreateSuperset = () => {
+        const supersetExercises = Array.from({ length: newSupersetSize }, () => ({
+            ...defaultExercise,
+            supersetId: currentSupersetId
+        }));
 
+        setExercises([...exercises, ...supersetExercises]);
+        setCurrentSupersetId(currentSupersetId + 1); // Increment the superset ID for next time
+        setNewSupersetSize(0); // Reset the superset size
+    };
 
 
     return (
         <form onSubmit={handleSubmit}>
             <h2>Track Workout Session</h2>
             {exercises.map((exercise, exerciseIndex) => (
-                <div key={exerciseIndex} className="exercise-section">
+                <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
                     <select
                         value={exercise.id || ''}
                         onChange={(e) => handleExerciseChange(exerciseIndex, e.target.value)}
@@ -334,6 +342,12 @@ const TrackWorkoutSession = () => {
                     <button onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
+
+            <div>
+                <label>Number of exercises in superset:</label>
+                <input type="number" value={newSupersetSize} onChange={(e) => setNewSupersetSize(Number(e.target.value))} />
+                <button type="button" onClick={handleCreateSuperset}>Create Superset</button>
+            </div>
 
 
         </form>
