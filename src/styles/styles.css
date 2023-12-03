@@ -422,7 +422,7 @@ body {
     background-color: translucent;
     backdrop-filter: blur(10px);
     padding-top: 5px;
-    padding-bottom: 3.5rem; /* Increased bottom padding */
+    padding-bottom: rem; /* Increased bottom padding */
     box-sizing: border-box;
 }
 

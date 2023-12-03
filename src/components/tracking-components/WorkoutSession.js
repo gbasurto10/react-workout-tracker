@@ -48,7 +48,7 @@ const WorkoutSession = () => {
 
     return (
         <div className="workout-session-container">
-            <h2 className="workout-session-header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
+            <h2 className="header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
             <p className="workout-session-description">Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
             <p className="workout-session-description">Description: {sessionDetails.Description}</p>
 

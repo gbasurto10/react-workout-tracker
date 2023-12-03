@@ -286,7 +286,7 @@ const TrackWorkoutSession = () => {
     return (
         <form onSubmit={handleSubmit}>
             <div className="track-workout-container">
-                <h2 className="track-workout-header">Track Workout Session</h2>
+                <h2 className="header">Track Workout Session</h2>
                 {exercises.map((exercise, exerciseIndex) => {
                     let supersetHeading = null;
                     if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
