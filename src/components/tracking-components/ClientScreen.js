@@ -18,12 +18,17 @@ const ClientScreen = () => {
             const data = await fetchClientsProfiles();
             const trainerIdNumber = Number(trainerId); // Convert trainerId to a number
             const filteredClients = data.filter(client => client.TrainerUserID === trainerIdNumber); // Filter clients
+    
+            // Sort clients alphabetically by first name
+            filteredClients.sort((a, b) => a.FirstName.localeCompare(b.FirstName));
+    
             setClients(filteredClients);
-            console.log("Filtered client data:", filteredClients)
+            console.log("Filtered client data:", filteredClients);
         } catch (error) {
             console.error('Error fetching clients:', error);
         }
     };
+    
 
     const navigateToClientWorkoutSessions = (clientId) => {
         navigate(`/client-workout-sessions/${clientId}`); // Update the path as per your routing setup
