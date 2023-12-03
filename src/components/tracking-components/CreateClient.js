@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { registerUser, createClientProfile, fetchTrainers } from '../../api/apiHandlers';
 import { useNavigate } from 'react-router-dom';
+import '../../styles/styles.css';
 
 
 const CreateClient = () => {
@@ -83,13 +84,22 @@ const CreateClient = () => {
 
 
     return (
-        <div>
-            {/* Form Inputs for Email, Password, FirstName, LastName */}
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-            <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" />
-            <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" />
-            <div>
+        <div className="form-container">
+            <h2>Create Client Account</h2>
+            {error && <p className="error-message">Error: {error}</p>}
+            <div className="form-control">
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+            </div>
+            <div className="form-control">
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+            </div>
+            <div className="form-control">
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" />
+            </div>
+            <div className="form-control">
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" />
+            </div>
+            <div className="form-control">
                 <label htmlFor="trainerSelect">Assign Trainer:</label>
                 <select
                     id="trainerSelect"
@@ -103,10 +113,10 @@ const CreateClient = () => {
                         </option>
                     ))}
                 </select>
-
             </div>
-            <button onClick={handleRegister}>Create Account and Profile</button>
-            {error && <p>Error: {error}</p>}
+            <div className="button-container">
+                <button className="button" onClick={handleRegister}>Create Account and Profile</button>
+            </div>
         </div>
     );
 };

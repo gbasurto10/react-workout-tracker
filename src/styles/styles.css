@@ -1,0 +1,498 @@
+/* ============
+   Global Styles 
+   ============ */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+.container {
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 3rem;
+    max-width: 1200px;
+}
+
+
+/* ============
+   Header Styles 
+   ============ */
+.header {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* =====================
+   Client Cards Grid Styles 
+   ===================== */
+.client-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Creates as many columns as can fit without going below 250px */
+    gap: 20px;
+    padding: 0;
+    margin-top: 20px; /* Adjusted margin for visual spacing */
+    list-style: none;
+}
+
+/* =====================
+   Responsive Adjustments 
+   ===================== */
+@media (max-width: 1024px) { /* Adjust for tablets */
+    .client-list {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) { /* Adjust for smaller tablets */
+    .client-list {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 480px) { /* Adjust for smartphones */
+    .client-list {
+        grid-template-columns: 1fr; /* One column on small screens */
+    }
+}
+
+/* =====================
+   Client Item Styles 
+   ===================== */
+.client-item {
+    background-color: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.client-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ============
+   Button Styles 
+   ============ */
+.button {
+    background-color: #0056b3; /* Consistent with the header color */
+    color: #fff;
+    padding: 15px 30px; /* Larger for touch targets */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #003d82; /* A slightly darker shade on hover */
+}
+
+.button-secondary {
+    background-color: #ff9900;
+}
+
+/* =====================
+   Button Container Styles 
+   ===================== */
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* ============
+   Footer Styles 
+   ============ */
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #0056b3;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* =====================
+   Responsive Adjustments 
+   ===================== */
+@media (max-width: 768px) {
+    .header {
+        font-size: 1.2rem;
+    }
+
+    .client-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .button {
+        padding: 12px 25px;
+    }
+}
+
+/* =====================
+   Form Container Styles 
+   ===================== */
+.form-container {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: 30px auto;
+}
+
+.form-control {
+    margin-bottom: 20px;
+}
+
+.form-control input[type="text"],
+.form-control input[type="email"],
+.form-control input[type="password"],
+.form-control select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.button-container {
+    text-align: center;
+}
+
+.button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%; /* Make the button full width */
+}
+
+.error-message {
+    color: #d9534f; /* Bootstrap 'danger' color */
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+/* Button and Link Styles */
+.button, .link-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none; /* For link-button */
+    display: inline-block; /* For link-button */
+    margin-right: 10px; /* Space between buttons */
+}
+
+.button:hover, .link-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Specific styles for the logout button to differentiate it */
+.logout-button {
+    background-color: #dc3545;
+}
+
+.logout-button:hover {
+    background-color: #bd2130;
+}
+
+/* Fixing the form container cut-off */
+.form-container {
+    padding: 20px;
+    width: auto; /* This ensures the form container width is automatic */
+    box-sizing: border-box; /* Includes padding in the width calculation */
+}
+
+/* Ensure inputs and select box do not overflow their container */
+.form-control input, .form-control select {
+    width: calc(100% - 20px); /* Subtracting the total padding from the width */
+    box-sizing: border-box; /* Includes padding in the width calculation */
+}
+
+/* =====================
+   Workout Session Styles
+   ===================== */
+
+   .workout-session-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.workout-session-header {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.workout-session-description {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.superset-container {
+    background-color: #e6e6e6; /* Slightly darker background color */
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.superset-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.superset-header {
+    font-size: 1.5rem;
+    color: black;
+    margin-bottom: 15px;
+}
+
+.exercise-container {
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: transform 0.3s ease;
+}
+
+.exercise-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-header {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Adjusting Workout Table inside Cards */
+.workout-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.workout-table th, .workout-table td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.workout-table th {
+    background-color: #e0e0e0;
+}
+
+/* Button Styles for WorkoutSession */
+.workout-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 10px 5px;
+}
+
+.workout-button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .workout-session-container {
+        padding: 15px;
+    }
+
+    .superset-container, .exercise-container {
+        padding: 8px;
+    }
+
+    .workout-button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* =====================
+  Track Workout Session Styles
+   ===================== */
+
+.track-workout-container {
+    padding-bottom: 3rem;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding-bottom: 50px;
+}
+
+.track-workout-header {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.exercise-section {
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: transform 0.3s ease;
+}
+
+.exercise-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.superset-exercise {
+    background-color: #d4d4d4;
+}
+
+.set-section {
+    margin-bottom: 10px;
+}
+
+/* Style for exercise selectors, inputs, and buttons */
+.exercise-selector, .set-input, .track-workout-button, .save-workout-button {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+
+.track-workout-button {
+    background-color: #6c757d; /* Subtle gray color */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.track-workout-button:hover {
+    background-color: #5a6268; /* Slightly darker shade for hover */
+}
+
+.track-workout-sticky-buttons {
+    display: flex;
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: translucent;
+    backdrop-filter: blur(10px);
+    padding-top: 5px;
+    padding-bottom: 3.5rem; /* Increased bottom padding */
+    box-sizing: border-box;
+}
+
+
+
+.save-workout-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.save-workout-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-workout-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.delete-workout-button:hover {
+    background-color: #bd2130;
+}
+
+
+/* Slide Over Styles */
+.slide-over-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    overflow-y: auto;
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    box-sizing: border-box;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.slide-over-container.open {
+    transform: translateX(0);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .track-workout-container {
+        padding: 15px;
+    }
+
+    .exercise-section, .superset-exercise {
+        padding: 10px;
+    }
+
+    .exercise-selector, .set-input, .track-workout-button {
+        padding: 6px;
+        font-size: 0.9rem;
+    }
+}

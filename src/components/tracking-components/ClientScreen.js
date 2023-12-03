@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchClientsProfiles } from '../../api/apiHandlers';
 import { useNavigate } from 'react-router-dom';
+import '../../styles/styles.css';
 
 const ClientScreen = () => {
     const [clients, setClients] = useState([]);
@@ -33,16 +34,30 @@ const ClientScreen = () => {
     };
 
     return (
-        <div>
-            <h1>Clients</h1>
-            <ul>
+        <div className="container">
+            <h1 className="header">Clients</h1>
+            <div className="client-list">
                 {clients.map(client => (
-                    <li key={client.UserID} onClick={() => navigateToClientWorkoutSessions(client.UserID)} style={{ cursor: 'pointer' }}>
-                        {client.FirstName} {client.LastName}
-                    </li>
+                    <div
+                        key={client.UserID}
+                        onClick={() => navigateToClientWorkoutSessions(client.UserID)}
+                        className="client-item"
+                    >
+                        <div className="client-avatar">
+                            {/* Placeholder for client avatar */}
+                        </div>
+                        <div className="client-info">
+                            <h2>{client.FirstName} {client.LastName}</h2>
+                            {/* Additional client info here */}
+                        </div>
+                    </div>
                 ))}
-            </ul>
-            <button onClick={navigateToCreateClient}>Create New Client</button>
+            </div>
+            <div className="button-container">
+                <button className="button" onClick={navigateToCreateClient}>
+                    Create New Client
+                </button>
+            </div>
         </div>
     );
 };

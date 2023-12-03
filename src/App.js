@@ -7,6 +7,7 @@ import ClientWorkoutSessions from './components/tracking-components/ClientWorkou
 import WorkoutSession from './components/tracking-components/WorkoutSession';
 import TrackWorkoutSession from './components/tracking-components/TrackWorkoutSession';
 import CreateClient from './components/tracking-components/CreateClient';
+import './App.css';
 
 function BackButton() {
   let navigate = useNavigate();
@@ -16,7 +17,7 @@ function BackButton() {
   };
 
   return (
-    <button onClick={goBack} style={{ marginRight: '10px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+    <button onClick={goBack} className="back-button">
       &#8592; Back
     </button>
   );
@@ -35,7 +36,16 @@ function LogoutButton() {
   };
 
   return (
-    <button onClick={handleLogout}>Logout</button>
+    <button onClick={handleLogout} className="logout-button">Logout</button>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="app-footer">
+      <Link to="/clients">Home</Link>
+      {/* Add more navigation links or icons as needed */}
+    </footer>
   );
 }
 
@@ -56,14 +66,14 @@ function Main() {
   return (
     <>
       {location.pathname !== '/' && (
-        <nav style={navStyles}>
+         <nav className="navbar">
           <div>
             {!isClientScreen && <BackButton />}
-            {!isClientScreen && <Link to="/clients">Home</Link>}
           </div>
           <LogoutButton />
         </nav>
       )}
+       <div className="main-content">
       <Routes>
         <Route exact path="/" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
@@ -74,25 +84,16 @@ function Main() {
         <Route path="/ClientWorkoutSessions" element={<ClientWorkoutSessions />} />
         <Route path="/create-client" element={<CreateClient />} />
       </Routes>
+      </div>
+      {location.pathname !== '/' && <Footer />}
     </>
   );
 }
 
 function App() {
-  const appStyles = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    background: 'clear'
-  };
-
   return (
     <Router>
-      <div style={appStyles}>
-        <Main />
-      </div>
+      <Main />
     </Router>
   );
 }

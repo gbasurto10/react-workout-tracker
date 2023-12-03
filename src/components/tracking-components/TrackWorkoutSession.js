@@ -11,6 +11,7 @@ import {
 } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import '../../styles/styles.css';
 
 
 
@@ -264,68 +265,91 @@ const TrackWorkoutSession = () => {
     const groupedHistory = groupByDate(exerciseHistory);
 
     const handleCreateSuperset = () => {
-        const supersetExercises = Array.from({ length: newSupersetSize }, () => ({
-            ...defaultExercise,
-            supersetId: currentSupersetId
-        }));
+        const size = prompt("How many exercises to add to the superset?");
+        if (size && !isNaN(size) && Number(size) > 0) {
+            const supersetSize = Number(size);
+            const supersetExercises = Array.from({ length: supersetSize }, () => ({
+                ...defaultExercise,
+                supersetId: currentSupersetId
+            }));
 
-        setExercises([...exercises, ...supersetExercises]);
-        setCurrentSupersetId(currentSupersetId + 1); // Increment the superset ID for next time
-        setNewSupersetSize(0); // Reset the superset size
+            setExercises([...exercises, ...supersetExercises]);
+            setCurrentSupersetId(currentSupersetId + 1);
+        } else {
+            alert("Please enter a valid number.");
+        }
     };
 
 
+    let lastSupersetId = null;
+
     return (
         <form onSubmit={handleSubmit}>
-            <h2>Track Workout Session</h2>
-            {exercises.map((exercise, exerciseIndex) => (
-                <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
-                    <select
-                        value={exercise.id || ''}
-                        onChange={(e) => handleExerciseChange(exerciseIndex, e.target.value)}
-                    >
-                        <option value="">Select an exercise</option>
-                        {availableExercises.map((ex) => (
-                            <option key={ex.ExerciseID} value={ex.ExerciseID}>{ex.Name}</option>
-                        ))}
-                    </select>
-                    <button type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
-                    <button type="button" onClick={() => toggleSlideOver(exercise.id)}>
-                        View Exercise History
-                    </button>
-                    {exercise.sets.map((set, setIndex) => (
-                        <div key={setIndex} className="set-section">
-                            <input
-                                type="number"
-                                placeholder="Reps"
-                                value={set.reps || ''}
-                                onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Weight"
-                                value={set.weight || ''}
-                                onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
-                            />
-                            <button type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
+            <div className="track-workout-container">
+                <h2 className="track-workout-header">Track Workout Session</h2>
+                {exercises.map((exercise, exerciseIndex) => {
+                    let supersetHeading = null;
+                    if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
+                        supersetHeading = <h3 className="superset-header">Superset</h3>;
+                        lastSupersetId = exercise.supersetId;
+                    }
+
+                    return (
+                        <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
+                            {supersetHeading}
+                            <select className="exercise-selector"
+                                value={exercise.id || ''}
+                                onChange={(e) => handleExerciseChange(exerciseIndex, e.target.value)}
+                            >
+                                <option value="">Select an exercise</option>
+                                {availableExercises.map((ex) => (
+                                    <option key={ex.ExerciseID} value={ex.ExerciseID}>{ex.Name}</option>
+                                ))}
+                            </select>
+                            <button className="track-workout-button" type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
+                            <button className="track-workout-button" type="button" onClick={() => toggleSlideOver(exercise.id)}>
+                                View Exercise History
+                            </button>
+                            {exercise.sets.map((set, setIndex) => (
+                                <div key={setIndex} className="set-section">
+                                    <input
+                                        className="set-input"
+                                        type="number"
+                                        placeholder="Reps"
+                                        value={set.reps || ''}
+                                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
+                                    />
+                                    <input
+                                        className="set-input"
+                                        type="number"
+                                        placeholder="Weight"
+                                        value={set.weight || ''}
+                                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
+                                    />
+                                    <button className="track-workout-button" type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
+                                </div>
+                            ))}
+                            <button className="track-workout-button" type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
                         </div>
-                    ))}
-                    <button type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
+                    );
+                })}
+                <button className="track-workout-button" type="button" onClick={addExercise}>Add Exercise</button>
+                <button className="track-workout-button" type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
+                <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
+                <div className="track-workout-sticky-buttons">
+                    <button className="save-workout-button" type="submit">Save Workout</button>
+                    <button className="delete-workout-button" type="button" onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this workout?')) {
+                            deleteWorkoutSession(sessionId, clientId)
+                                .then(() => navigate(`/client-workout-sessions/${clientId}`))
+                                .catch(err => console.error(err));
+                        }
+                    }}>Delete Workout</button>
                 </div>
-            ))}
-            <button type="button" onClick={addExercise}>Add Exercise</button>
-            <button type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
-            <button type="submit">Save Workout</button>
-            <button type="button" onClick={() => {
-                if (window.confirm('Are you sure you want to delete this workout?')) {
-                    deleteWorkoutSession(sessionId, clientId)
-                        .then(() => navigate(`/client-workout-sessions/${clientId}`))
-                        .catch(err => console.error(err));
-                }
-            }}>Delete Workout</button>
+            </div>
 
             {isSlideOverOpen && (
-                <div style={{ ...slideOverStyles, ...(isSlideOverOpen ? slideOverOpenStyles : {}) }}>
+                <div className="slide-over-container open">
                     <h3>Exercise History</h3>
                     {Object.keys(groupedHistory).map(date => (
                         <div key={date}>
@@ -339,18 +363,11 @@ const TrackWorkoutSession = () => {
                             </ul>
                         </div>
                     ))}
-                    <button onClick={toggleSlideOver}>Close</button>
+                    <button className="track-workout-button" onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
-
-            <div>
-                <label>Number of exercises in superset:</label>
-                <input type="number" value={newSupersetSize} onChange={(e) => setNewSupersetSize(Number(e.target.value))} />
-                <button type="button" onClick={handleCreateSuperset}>Create Superset</button>
-            </div>
-
-
         </form>
+
     );
 
 };

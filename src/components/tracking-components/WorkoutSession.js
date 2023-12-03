@@ -15,11 +15,11 @@ const WorkoutSession = () => {
         const loadSessionDetails = async () => {
             try {
                 const response = await fetchSessionDetails(sessionId);
-                // Process the response to group sets by exercise
+                // Process the response to group sets by exercise and SupersetID
                 const exercisesWithSets = response.Exercises.reduce((acc, current) => {
-                    const { ExerciseID, Name, Type, SetNumber, Reps, Weight } = current;
-                    const foundExercise = acc.find(ex => ex.ExerciseID === ExerciseID);
+                    const { ExerciseID, Name, Type, SetNumber, Reps, Weight, SupersetID } = current;
                     const set = { SetNumber, Reps, Weight };
+                    const foundExercise = acc.find(ex => ex.ExerciseID === ExerciseID && ex.SupersetID === SupersetID);
                     if (foundExercise) {
                         foundExercise.Sets.push(set);
                     } else {
@@ -27,7 +27,8 @@ const WorkoutSession = () => {
                             ExerciseID,
                             Name,
                             Type,
-                            Sets: [set]
+                            Sets: [set],
+                            SupersetID
                         });
                     }
                     return acc;
@@ -46,14 +47,57 @@ const WorkoutSession = () => {
     }
 
     return (
-        <div>
-            <h2>Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
-            <p>Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
-            <p>Description: {sessionDetails.Description}</p>
-            {sessionDetails.Exercises.map((exercise) => (
-                <div key={exercise.ExerciseID}>
-                    <h3>{exercise.Name} ({exercise.Type})</h3>
-                    <table>
+        <div className="workout-session-container">
+            <h2 className="workout-session-header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
+            <p className="workout-session-description">Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
+            <p className="workout-session-description">Description: {sessionDetails.Description}</p>
+
+            {sessionDetails.Exercises.reduce((acc, exercise) => {
+                if (exercise.SupersetID !== null) {
+                    const foundSuperset = acc.find(superset => superset.SupersetID === exercise.SupersetID);
+                    if (foundSuperset) {
+                        foundSuperset.Exercises.push(exercise);
+                    } else {
+                        acc.push({
+                            SupersetID: exercise.SupersetID,
+                            Exercises: [exercise]
+                        });
+                    }
+                }
+                return acc;
+            }, []).map((superset, index) => (
+                <div className="superset-container">
+                    <h3 className="superset-header">Superset</h3>
+                    {superset.Exercises.map((exercise) => (
+                        <div key={exercise.ExerciseID} className="exercise-container">
+                            <h4 className="exercise-header">{exercise.Name}</h4>
+                            <table className="workout-table">
+                                <thead>
+                                    <tr>
+                                        <th>Set</th>
+                                        <th>Reps</th>
+                                        <th>Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {exercise.Sets.map((set, index) => (
+                                        <tr key={index}>
+                                            <td>{set.SetNumber}</td>
+                                            <td>{set.Reps}</td>
+                                            <td>{set.Weight}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ))}
+                </div>
+            ))}
+
+            {sessionDetails.Exercises.filter(exercise => exercise.SupersetID === null).map((exercise, index) => (
+                <div key={index} className="exercise-container">
+                    <h4 className="exercise-header">{exercise.Name}</h4>
+                    <table className="workout-table">
                         <thead>
                             <tr>
                                 <th>Set</th>
@@ -73,6 +117,7 @@ const WorkoutSession = () => {
                     </table>
                 </div>
             ))}
+
             <button onClick={() => {
                 if (window.confirm('Are you sure you want to delete this workout?')) {
                     deleteWorkoutSession(sessionDetails.SessionID, clientId)
@@ -87,6 +132,7 @@ const WorkoutSession = () => {
             }}>Update Workout</button>
         </div>
     );
+
 };
 
 export default WorkoutSession;

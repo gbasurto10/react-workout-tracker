@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchWorkoutSessions, startNewWorkoutSession, fetchUserProfile } from '../../api/apiHandlers';
 import { useNavigate } from 'react-router-dom';
+import '../../styles/styles.css';
+
 
 const ClientWorkoutSessions = () => {
     const { clientId } = useParams();
@@ -56,11 +58,11 @@ const ClientWorkoutSessions = () => {
 
     return (
         <div>
-            <h2>Workout Sessions for {clientName}</h2>
-            <button onClick={handleStartNewWorkout}>Start New Workout</button>
-            <ul>
+            <h2 className="header">Workout Sessions for {clientName}</h2>
+            <button className="new-workout-button" onClick={handleStartNewWorkout}>Start New Workout</button>
+            <ul className="session-list">
                 {sessions.map(session => (
-                    <li key={session.SessionID} onClick={() => handleSessionClick(session)} style={{ cursor: 'pointer' }}>
+                    <li key={session.SessionID} onClick={() => handleSessionClick(session)} className="session-item">
                         Date: {new Date(session.Date).toLocaleDateString()},
                         Status: {session.isFinished ? "Finished" : "In Progress"}
                     </li>
