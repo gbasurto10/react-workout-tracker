@@ -116,6 +116,10 @@ const TrackWorkoutSession = () => {
     // Function to load exercises
     const loadExercises = async () => {
         const exercisesData = await fetchExercises();
+        console.log("Exercises: ", exercisesData);
+
+        exercisesData.sort((a, b) => a.Name.localeCompare(b.Name));
+
         setAvailableExercises(exercisesData);
     };
 
