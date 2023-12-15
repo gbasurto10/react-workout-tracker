@@ -123,7 +123,8 @@ const TrackWorkoutSession = () => {
                     Object.values(superset).forEach(exercise => {
                         exercisesArray.push({
                             ...exercise,
-                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber) // Ensure sets are sorted
+                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber), // Ensure sets are sorted
+                            inputValue: exercise.name // Set the inputValue to the exercise name
                         });
                     });
                 });
@@ -141,7 +142,15 @@ const TrackWorkoutSession = () => {
         const savedSession = localStorage.getItem('workoutSession');
         if (savedSession) {
             console.log('Loaded from localStorage:', savedSession);
-            setExercises(JSON.parse(savedSession));
+            const sessionData = JSON.parse(savedSession);
+
+            // Update each exercise to include the inputValue field
+            const updatedExercises = sessionData.exercises.map(exercise => ({
+                ...exercise,
+                inputValue: exercise.name || '' // Set the inputValue to the exercise name, or default to an empty string
+            }));
+
+            setExercises(updatedExercises);
         } else {
             loadSessionExercises();
         }
