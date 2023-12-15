@@ -131,6 +131,7 @@ const TrackWorkoutSession = () => {
             }
         };
 
+        // Load from local storage if available, otherwise load from the API
         const savedSession = localStorage.getItem('workoutSession');
         if (savedSession) {
             console.log('Loaded from localStorage:', savedSession);
@@ -181,17 +182,6 @@ const TrackWorkoutSession = () => {
         };
         setExercises(newExercises);
     };
-
-
-
-    function handleSetChange(exerciseIndex, setIndex, field, value) {
-        setExercises(prevExercises => {
-            // Create a deep copy of the exercises
-            const newExercises = JSON.parse(JSON.stringify(prevExercises));
-            newExercises[exerciseIndex].sets[setIndex][field] = value;
-            return newExercises;
-        });
-    }
 
     const addExercise = () => {
         const newExercise = {
@@ -403,28 +393,54 @@ const TrackWorkoutSession = () => {
         setExercises(prevExercises => {
             const newExercises = JSON.parse(JSON.stringify(prevExercises));
             newExercises[exerciseIndex].sets[setIndex][field] = value;
-
-            // Save to local storage
-            localStorage.setItem('workoutSession', JSON.stringify(newExercises));
-            console.log('Saved to localStorage:', newExercises);
-
-
+    
+            const sessionData = {
+                sessionId: sessionId || null,
+                clientId: clientId || null,
+                exercises: newExercises
+            };
+    
+            localStorage.setItem('workoutSession', JSON.stringify(sessionData));
+            console.log('Saved to localStorage:', sessionData);
+    
             return newExercises;
         });
     }
+    
+    
+    
 
     // Load from local storage when the component mounts
     useEffect(() => {
         const savedSession = localStorage.getItem('workoutSession');
-        console.log('Loaded from localStorage:', savedSession);
         if (savedSession) {
-            setExercises(JSON.parse(savedSession));
+            const sessionData = JSON.parse(savedSession);
+    
+            if ((sessionData.sessionId === sessionId || sessionData.sessionId === null) &&
+                (sessionData.clientId === clientId || sessionData.clientId === null)) {
+    
+                // Check if sessionData.exercises is an array before setting it
+                if (sessionData.exercises && Array.isArray(sessionData.exercises)) {
+                    setExercises(sessionData.exercises);
+                } else {
+                    // Initialize exercises with defaultExercise if sessionData.exercises is not an array
+                    setExercises([defaultExercise]);
+                }
+    
+            } else {
+                console.log('Session and client ID from local storage do not match the current session.');
+                // Initialize exercises for a new session
+                setExercises([defaultExercise]);
+            }
+        } else {
+            // If there's no saved session, initialize with default exercise
+            setExercises([defaultExercise]);
         }
-    }, []);
-
-
-
-
+    }, [sessionId, clientId]);
+    
+    
+    
+    
 
 
     return (

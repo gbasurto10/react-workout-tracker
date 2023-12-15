@@ -2,7 +2,7 @@
 
 const IS_DEV = false;  // set this to true when developing at home, false otherwise
 
-export const API_URL = IS_DEV ? 'http://192.168.1.162:3000' : 'http://api.codebyg.com:3000';
+export const API_URL = IS_DEV ? 'http://192.168.1.162:3000' : 'https://api.codebyg.com:3000';
 export const API_KEY = '01241991';
 
 const headers = {
