@@ -46,15 +46,24 @@ const ClientWorkoutSessions = () => {
     };
 
     const handleStartNewWorkout = async () => {
-        try {
-            const response = await startNewWorkoutSession(clientId);
-            // Navigate to the TrackWorkoutSession component with the new session ID
-            navigate(`/track-workout-session/${response.SessionID}/${clientId}`);
-        } catch (error) {
-            console.error('Error starting new workout session:', error);
-            // Handle error (e.g., show error message)
+        // Check if there's an active workout session in local storage
+        const savedSession = localStorage.getItem('workoutSession');
+        if (savedSession) {
+            // If there's an active session, warn the user and prevent starting a new workout
+            alert("There is an active workout session in progress. Please save or discard it before starting a new session.");
+        } else {
+            // If there's no active session, proceed to start a new workout session
+            try {
+                const response = await startNewWorkoutSession(clientId);
+                // Navigate to the TrackWorkoutSession component with the new session ID
+                navigate(`/track-workout-session/${response.SessionID}/${clientId}`);
+            } catch (error) {
+                console.error('Error starting new workout session:', error);
+                // Handle error (e.g., show error message)
+            }
         }
     };
+    
 
     return (
         <div>

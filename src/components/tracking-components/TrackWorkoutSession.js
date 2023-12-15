@@ -36,6 +36,7 @@ const TrackWorkoutSession = () => {
 
 
 
+
     // Mock exercise history data
     const mockExerciseHistory = [
         { date: "2023-03-01", exercise: "Squats", sets: 3, reps: 12, weight: 100 },
@@ -69,37 +70,60 @@ const TrackWorkoutSession = () => {
     useEffect(() => {
         const loadSessionExercises = async () => {
             try {
-                const sessionExercisesData = await fetchSessionExercises(sessionId);
+                let sessionExercisesData = await fetchSessionExercises(sessionId);
+                console.log("Session Exercises Data:", sessionExercisesData);
 
-                // Group sets by ExerciseID
-                const groupedExercises = sessionExercisesData.reduce((acc, current) => {
-                    const { ExerciseID, Name, Type, SessionExerciseID, Reps, Weight } = current;
-                    // If the exercise hasn't been added to the accumulator, add it
-                    if (!acc[ExerciseID]) {
-                        acc[ExerciseID] = {
-                            id: ExerciseID,
-                            name: Name,
-                            type: Type,
+                // Sort by OrderID
+                sessionExercisesData.sort((a, b) => a.OrderID - b.OrderID);
+
+                // Find the maximum SupersetID to correctly initialize currentSupersetId
+                const maxSupersetId = sessionExercisesData.reduce((max, curr) => {
+                    return (curr.SupersetID && curr.SupersetID > max) ? curr.SupersetID : max;
+                }, 0);
+                setCurrentSupersetId(maxSupersetId + 1);
+
+                // Group exercises by SupersetID then by ExerciseID
+                let supersets = {};
+                sessionExercisesData.forEach(exercise => {
+                    const supersetKey = exercise.SupersetID ? `superset-${exercise.SupersetID}` : `exercise-${exercise.ExerciseID}`;
+                    const exerciseKey = `exercise-${exercise.ExerciseID}`;
+
+                    if (!supersets[supersetKey]) {
+                        supersets[supersetKey] = {};
+                    }
+
+                    if (!supersets[supersetKey][exerciseKey]) {
+                        supersets[supersetKey][exerciseKey] = {
+                            id: exercise.ExerciseID,
+                            name: exercise.Name,
+                            type: exercise.Type, // Assuming there is a type field
                             sets: [],
+                            supersetId: exercise.SupersetID,
+                            order: exercise.OrderID, // Keep track of order
                         };
                     }
-                    // Push the current set to the exercise entry
-                    acc[ExerciseID].sets.push({
-                        sessionExerciseID: SessionExerciseID, // Use SessionExerciseID to maintain the unique identifier for each set
-                        reps: Reps,
-                        weight: Weight,
+
+                    supersets[supersetKey][exerciseKey].sets.push({
+                        sessionExerciseID: exercise.SessionExerciseID,
+                        reps: exercise.Reps,
+                        weight: exercise.Weight,
+                        setNumber: exercise.SetNumber
                     });
-                    return acc;
-                }, {});
-
-                // Convert the grouped exercises object back to an array
-                const exercisesArray = Object.values(groupedExercises);
-
-                // Sort sets for each exercise by SessionExerciseID
-                exercisesArray.forEach(exercise => {
-                    exercise.sets.sort((a, b) => a.sessionExerciseID - b.sessionExerciseID);
-                    console.log(`Existing sets for exercise ${exercise.name}:`, exercise.sets);
                 });
+
+                // Flatten the supersets into a sorted array
+                let exercisesArray = [];
+                Object.values(supersets).forEach(superset => {
+                    Object.values(superset).forEach(exercise => {
+                        exercisesArray.push({
+                            ...exercise,
+                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber) // Ensure sets are sorted
+                        });
+                    });
+                });
+
+                // Sort by OrderID to maintain the overall order
+                exercisesArray.sort((a, b) => a.order - b.order);
 
                 setExercises(exercisesArray);
             } catch (err) {
@@ -107,8 +131,19 @@ const TrackWorkoutSession = () => {
             }
         };
 
-        loadSessionExercises();
+        // Load from local storage if available, otherwise load from the API
+        const savedSession = localStorage.getItem('workoutSession');
+        if (savedSession) {
+            console.log('Loaded from localStorage:', savedSession);
+            setExercises(JSON.parse(savedSession));
+        } else {
+            loadSessionExercises();
+        }
     }, [sessionId]);
+
+
+
+
 
 
 
@@ -116,7 +151,6 @@ const TrackWorkoutSession = () => {
     // Function to load exercises
     const loadExercises = async () => {
         const exercisesData = await fetchExercises();
-        console.log("Exercises: ", exercisesData);
 
         exercisesData.sort((a, b) => a.Name.localeCompare(b.Name));
 
@@ -149,25 +183,16 @@ const TrackWorkoutSession = () => {
         setExercises(newExercises);
     };
 
-
-
-    function handleSetChange(exerciseIndex, setIndex, field, value) {
-        setExercises(prevExercises => {
-            // Create a deep copy of the exercises
-            const newExercises = JSON.parse(JSON.stringify(prevExercises));
-            newExercises[exerciseIndex].sets[setIndex][field] = value;
-            return newExercises;
-        });
-    }
-
     const addExercise = () => {
         const newExercise = {
             ...defaultExercise,
-            sets: [{ reps: '', weight: '' }]
+            sets: [{ reps: '', weight: '' }],
+            order: exercises.length + 1 // Assign the next OrderID
         };
 
         setExercises([...exercises, newExercise]);
     };
+
 
 
     const addSet = (exerciseIndex) => {
@@ -178,28 +203,46 @@ const TrackWorkoutSession = () => {
     };
 
     const removeExercise = (index) => {
+        const exerciseToRemove = exercises[index];
+        console.log('Removing exercise:', exerciseToRemove, 'at index:', index);
+    
         const newExercises = exercises.filter((_, i) => i !== index);
         setExercises(newExercises);
+    
+        // Save updated state to local storage
+        localStorage.setItem('workoutSession', JSON.stringify(newExercises));
     };
+    
+    
 
     const removeSet = (exerciseIndex, setIndex) => {
+        const setToRemove = exercises[exerciseIndex].sets[setIndex];
+        console.log('Removing set:', setToRemove, 'from exercise at index:', exerciseIndex);
+    
         const newExercises = [...exercises];
         newExercises[exerciseIndex].sets = newExercises[exerciseIndex].sets.filter((_, i) => i !== setIndex);
         setExercises(newExercises);
+    
+        // Save updated state to local storage
+        localStorage.setItem('workoutSession', JSON.stringify(newExercises));
     };
+    
+    
 
     // Prepare exercises for saving
     function prepareExercisesForSave() {
-        return exercises.map(exercise => ({
+        return exercises.map((exercise, index) => ({
             ExerciseID: exercise.id,
-            SupersetID: exercise.supersetId || null,
-            sets: exercise.sets.map((set, index) => ({
-                SetNumber: index + 1,  // Assign set number based on the index
+            SupersetID: exercise.supersetId || null,  // Include SupersetID, default to null if not present
+            OrderID: index + 1,  // Assign OrderID based on the index in the array
+            sets: exercise.sets.map((set, setIndex) => ({
+                SetNumber: setIndex + 1,  // Assign set number based on the index
                 Reps: set.reps,
                 Weight: set.weight
             }))
         }));
     }
+
 
 
 
@@ -217,6 +260,9 @@ const TrackWorkoutSession = () => {
             console.log('Workout session saved and marked as finished');
             // Handle post-save actions (e.g., navigate or show a message)
 
+            // Clear local storage
+            localStorage.removeItem('workoutSession');
+
             navigate(`/client-workout-sessions/${clientId}`);
 
         } catch (error) {
@@ -224,6 +270,20 @@ const TrackWorkoutSession = () => {
             // Handle error
         }
     };
+
+    const handleDeleteWorkout = () => {
+        if (window.confirm('Are you sure you want to delete this workout?')) {
+            deleteWorkoutSession(sessionId, clientId)
+                .then(() => {
+                    // Clear local storage
+                    localStorage.removeItem('workoutSession');
+    
+                    navigate(`/client-workout-sessions/${clientId}`);
+                })
+                .catch(err => console.error(err));
+        }
+    };
+    
 
 
     const handleAddNewExercise = async () => {
@@ -268,16 +328,20 @@ const TrackWorkoutSession = () => {
 
     const groupedHistory = groupByDate(exerciseHistory);
 
+
+    // Create a new superset
     const handleCreateSuperset = () => {
         const size = prompt("How many exercises to add to the superset?");
         if (size && !isNaN(size) && Number(size) > 0) {
             const supersetSize = Number(size);
             const supersetExercises = Array.from({ length: supersetSize }, () => ({
                 ...defaultExercise,
-                supersetId: currentSupersetId
+                supersetId: currentSupersetId // Use the currentSupersetId
             }));
 
+            // Add the new superset exercises to the existing ones
             setExercises([...exercises, ...supersetExercises]);
+            // Increment the currentSupersetId to ensure the next one is unique
             setCurrentSupersetId(currentSupersetId + 1);
         } else {
             alert("Please enter a valid number.");
@@ -285,7 +349,99 @@ const TrackWorkoutSession = () => {
     };
 
 
+
+    // Move an exercise up
+    const moveExerciseUp = (exerciseIndex) => {
+        setExercises(prevExercises => {
+            if (exerciseIndex === 0) return prevExercises; // Prevent moving the first item
+
+            const newExercises = [...prevExercises];
+            // Swap the exercises
+            [newExercises[exerciseIndex - 1], newExercises[exerciseIndex]] = [newExercises[exerciseIndex], newExercises[exerciseIndex - 1]];
+
+            // Update OrderID for swapped exercises
+            newExercises[exerciseIndex - 1].order = exerciseIndex;
+            newExercises[exerciseIndex].order = exerciseIndex + 1;
+
+            return newExercises;
+        });
+    };
+
+    // Move an exercise down
+    const moveExerciseDown = (exerciseIndex) => {
+        setExercises(prevExercises => {
+            if (exerciseIndex >= prevExercises.length - 1) return prevExercises; // Prevent moving the last exercise
+
+            const newExercises = [...prevExercises];
+            // Swap the exercises
+            [newExercises[exerciseIndex], newExercises[exerciseIndex + 1]] = [newExercises[exerciseIndex + 1], newExercises[exerciseIndex]];
+
+            // Update OrderID for swapped exercises
+            newExercises[exerciseIndex].order = exerciseIndex + 2;
+            newExercises[exerciseIndex + 1].order = exerciseIndex + 1;
+
+            return newExercises;
+        });
+    };
+
+    // Keep track of the last superset ID
     let lastSupersetId = null;
+
+
+    // Handle exercise change
+    function handleSetChange(exerciseIndex, setIndex, field, value) {
+        setExercises(prevExercises => {
+            const newExercises = JSON.parse(JSON.stringify(prevExercises));
+            newExercises[exerciseIndex].sets[setIndex][field] = value;
+    
+            const sessionData = {
+                sessionId: sessionId || null,
+                clientId: clientId || null,
+                exercises: newExercises
+            };
+    
+            localStorage.setItem('workoutSession', JSON.stringify(sessionData));
+            console.log('Saved to localStorage:', sessionData);
+    
+            return newExercises;
+        });
+    }
+    
+    
+    
+
+    // Load from local storage when the component mounts
+    useEffect(() => {
+        const savedSession = localStorage.getItem('workoutSession');
+        if (savedSession) {
+            const sessionData = JSON.parse(savedSession);
+    
+            if ((sessionData.sessionId === sessionId || sessionData.sessionId === null) &&
+                (sessionData.clientId === clientId || sessionData.clientId === null)) {
+    
+                // Check if sessionData.exercises is an array before setting it
+                if (sessionData.exercises && Array.isArray(sessionData.exercises)) {
+                    setExercises(sessionData.exercises);
+                } else {
+                    // Initialize exercises with defaultExercise if sessionData.exercises is not an array
+                    setExercises([defaultExercise]);
+                }
+    
+            } else {
+                console.log('Session and client ID from local storage do not match the current session.');
+                // Initialize exercises for a new session
+                setExercises([defaultExercise]);
+            }
+        } else {
+            // If there's no saved session, initialize with default exercise
+            setExercises([defaultExercise]);
+        }
+    }, [sessionId, clientId]);
+    
+    
+    
+    
+
 
     return (
         <form onSubmit={handleSubmit}>
@@ -294,7 +450,7 @@ const TrackWorkoutSession = () => {
                 {exercises.map((exercise, exerciseIndex) => {
                     let supersetHeading = null;
                     if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
-                        supersetHeading = <h3 className="superset-header">Superset</h3>;
+                        supersetHeading = <h3 className="superset-header">Superset {exercise.supersetId}</h3>;
                         lastSupersetId = exercise.supersetId;
                     }
 
@@ -334,6 +490,8 @@ const TrackWorkoutSession = () => {
                                 </div>
                             ))}
                             <button className="track-workout-button" type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
+                            <button className="track-workout-button" type="button" onClick={() => moveExerciseUp(exerciseIndex)}>Move Up</button>
+                            <button className="track-workout-button" type="button" onClick={() => moveExerciseDown(exerciseIndex)}>Move Down</button>
                         </div>
                     );
                 })}
@@ -342,13 +500,8 @@ const TrackWorkoutSession = () => {
                 <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
                 <div className="track-workout-sticky-buttons">
                     <button className="save-workout-button" type="submit">Save Workout</button>
-                    <button className="delete-workout-button" type="button" onClick={() => {
-                        if (window.confirm('Are you sure you want to delete this workout?')) {
-                            deleteWorkoutSession(sessionId, clientId)
-                                .then(() => navigate(`/client-workout-sessions/${clientId}`))
-                                .catch(err => console.error(err));
-                        }
-                    }}>Delete Workout</button>
+                    <button className="delete-workout-button" type="button" onClick={handleDeleteWorkout}>Delete Workout</button>
+
                 </div>
             </div>
 
