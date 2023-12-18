@@ -373,6 +373,43 @@ body {
     transition: transform 0.3s ease;
 }
 
+.exercise-search-input {
+    width: 80%;
+    padding: 10px 15px; /* Comfortable padding for typing */
+    border: 2px solid #ddd; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 1rem; /* Readable text size */
+    color: #333; /* Dark text for better readability */
+    background-color: #fff; /* White background */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    transition: border-color 0.3s ease-in-out; /* Smooth transition for interactions */
+}
+
+.exercise-search-input:focus {
+    border-color: #0056b3; /* Highlight color when focused */
+    outline: none; /* Removing default focus outline */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slightly more prominent shadow on focus */
+}
+
+.exercise-suggestions {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Reset default padding */
+    margin: 0; /* Reset default margin */
+    /* Add any additional styling you need for the dropdown here */
+}
+
+.exercise-suggestions li {
+    padding: 5px 10px; /* Padding for each list item */
+    cursor: pointer; /* Change cursor to indicate it's clickable */
+    transition: background-color 0.2s ease-in-out; /* Smooth transition for background color change */
+}
+
+.exercise-suggestions li:hover {
+    background-color: #e6f7ff; /* Highlight background color on hover */
+    color: #0056b3; /* Optionally change text color for contrast */
+}
+
+
 .exercise-section:hover {
     transform: translateY(-3px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -391,7 +428,6 @@ body {
     padding: 8px;
     margin: 5px;
     border-radius: 4px;
-    border: 1px solid #ccc;
 }
 
 

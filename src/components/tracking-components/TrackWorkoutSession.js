@@ -179,6 +179,7 @@ const TrackWorkoutSession = () => {
 
     // Handle exercise selection
     const handleExerciseSelect = (index, selectedExercise) => {
+        console.log('Selected exercise:', selectedExercise, 'at index:', index);
         const newExercises = [...exercises];
         newExercises[index] = {
             ...newExercises[index],
@@ -471,8 +472,6 @@ const TrackWorkoutSession = () => {
 
 
 
-
-
     return (
         <form onSubmit={handleSubmit}>
             <div className="track-workout-container">
@@ -492,24 +491,31 @@ const TrackWorkoutSession = () => {
                                     type="text"
                                     placeholder="Type to search exercises..."
                                     value={exercise.inputValue || ''}
+                                    className="exercise-search-input"
                                     onChange={(e) => {
                                         handleExerciseInputChange(exerciseIndex, e.target.value);
                                         setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true });
                                     }}
-                                    onBlur={() => {
-                                        // Optionally delay the hiding to allow for selection
-                                        setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300);
-                                    }}
+                                    onFocus={() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true })}
+                                    onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
+
                                 />
                                 {/* Suggestions dropdown */}
-                                {isDropdownVisible[exerciseIndex] && exercise.inputValue && (
+                                {isDropdownVisible[exerciseIndex] && (
                                     <ul className="exercise-suggestions">
                                         {filterExercises(exercise.inputValue).map(ex => (
-                                            <li key={ex.ExerciseID} onClick={() => handleExerciseSelect(exerciseIndex, ex)}>
+                                            <li
+                                                key={ex.ExerciseID}
+                                                onClick={() => {
+                                                    console.log("Selected exercise:", ex.Name, "with ID:", ex.ExerciseID);
+                                                    handleExerciseSelect(exerciseIndex, ex);
+                                                    setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false });
+                                                }}>
                                                 {ex.Name}
                                             </li>
                                         ))}
                                     </ul>
+
                                 )}
                             </div>
 
