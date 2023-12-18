@@ -19,7 +19,9 @@ const defaultExercise = {
     name: '',
     type: '',
     sets: [{ reps: '', weight: '' }],
+    inputValue: ''
 };
+
 
 const TrackWorkoutSession = () => {
     const [sessionDetails, setSessionDetails] = useState(null);
@@ -32,6 +34,10 @@ const TrackWorkoutSession = () => {
     const [exerciseHistory, setExerciseHistory] = useState([]);
     const [currentSupersetId, setCurrentSupersetId] = useState(1);
     const [newSupersetSize, setNewSupersetSize] = useState(0);
+    const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
+    const [isDropdownVisible, setIsDropdownVisible] = useState({});
+
+
 
 
 
@@ -117,7 +123,8 @@ const TrackWorkoutSession = () => {
                     Object.values(superset).forEach(exercise => {
                         exercisesArray.push({
                             ...exercise,
-                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber) // Ensure sets are sorted
+                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber), // Ensure sets are sorted
+                            inputValue: exercise.name // Set the inputValue to the exercise name
                         });
                     });
                 });
@@ -135,7 +142,15 @@ const TrackWorkoutSession = () => {
         const savedSession = localStorage.getItem('workoutSession');
         if (savedSession) {
             console.log('Loaded from localStorage:', savedSession);
-            setExercises(JSON.parse(savedSession));
+            const sessionData = JSON.parse(savedSession);
+
+            // Update each exercise to include the inputValue field
+            const updatedExercises = sessionData.exercises.map(exercise => ({
+                ...exercise,
+                inputValue: exercise.name || '' // Set the inputValue to the exercise name, or default to an empty string
+            }));
+
+            setExercises(updatedExercises);
         } else {
             loadSessionExercises();
         }
@@ -162,26 +177,26 @@ const TrackWorkoutSession = () => {
         loadExercises();
     }, []);
 
-    const handleExerciseChange = (index, selectedExerciseID) => {
-        console.log("Selected Exercise ID:", selectedExerciseID);
-        console.log("Available Exercises:", availableExercises);
-
+    // Handle exercise selection
+    const handleExerciseSelect = (index, selectedExercise) => {
+        console.log('Selected exercise:', selectedExercise, 'at index:', index);
         const newExercises = [...exercises];
-        const selectedExercise = availableExercises.find(ex => ex.ExerciseID.toString() === selectedExerciseID);
-
-        if (!selectedExercise) {
-            console.error("Selected exercise not found in available exercises");
-            return;
-        }
-
         newExercises[index] = {
             ...newExercises[index],
-            id: selectedExerciseID,
+            id: selectedExercise.ExerciseID,
             name: selectedExercise.Name,
-            type: selectedExercise.Type
+            type: selectedExercise.Type,
+            inputValue: selectedExercise.Name // Keep the selected exercise name
         };
         setExercises(newExercises);
+        setIsDropdownVisible({ ...isDropdownVisible, [index]: false }); // Hide the dropdown
     };
+
+
+
+
+
+
 
     const addExercise = () => {
         const newExercise = {
@@ -205,29 +220,29 @@ const TrackWorkoutSession = () => {
     const removeExercise = (index) => {
         const exerciseToRemove = exercises[index];
         console.log('Removing exercise:', exerciseToRemove, 'at index:', index);
-    
+
         const newExercises = exercises.filter((_, i) => i !== index);
         setExercises(newExercises);
-    
+
         // Save updated state to local storage
         localStorage.setItem('workoutSession', JSON.stringify(newExercises));
     };
-    
-    
+
+
 
     const removeSet = (exerciseIndex, setIndex) => {
         const setToRemove = exercises[exerciseIndex].sets[setIndex];
         console.log('Removing set:', setToRemove, 'from exercise at index:', exerciseIndex);
-    
+
         const newExercises = [...exercises];
         newExercises[exerciseIndex].sets = newExercises[exerciseIndex].sets.filter((_, i) => i !== setIndex);
         setExercises(newExercises);
-    
+
         // Save updated state to local storage
         localStorage.setItem('workoutSession', JSON.stringify(newExercises));
     };
-    
-    
+
+
 
     // Prepare exercises for saving
     function prepareExercisesForSave() {
@@ -277,13 +292,13 @@ const TrackWorkoutSession = () => {
                 .then(() => {
                     // Clear local storage
                     localStorage.removeItem('workoutSession');
-    
+
                     navigate(`/client-workout-sessions/${clientId}`);
                 })
                 .catch(err => console.error(err));
         }
     };
-    
+
 
 
     const handleAddNewExercise = async () => {
@@ -393,32 +408,32 @@ const TrackWorkoutSession = () => {
         setExercises(prevExercises => {
             const newExercises = JSON.parse(JSON.stringify(prevExercises));
             newExercises[exerciseIndex].sets[setIndex][field] = value;
-    
+
             const sessionData = {
                 sessionId: sessionId || null,
                 clientId: clientId || null,
                 exercises: newExercises
             };
-    
+
             localStorage.setItem('workoutSession', JSON.stringify(sessionData));
             console.log('Saved to localStorage:', sessionData);
-    
+
             return newExercises;
         });
     }
-    
-    
-    
+
+
+
 
     // Load from local storage when the component mounts
     useEffect(() => {
         const savedSession = localStorage.getItem('workoutSession');
         if (savedSession) {
             const sessionData = JSON.parse(savedSession);
-    
+
             if ((sessionData.sessionId === sessionId || sessionData.sessionId === null) &&
                 (sessionData.clientId === clientId || sessionData.clientId === null)) {
-    
+
                 // Check if sessionData.exercises is an array before setting it
                 if (sessionData.exercises && Array.isArray(sessionData.exercises)) {
                     setExercises(sessionData.exercises);
@@ -426,7 +441,7 @@ const TrackWorkoutSession = () => {
                     // Initialize exercises with defaultExercise if sessionData.exercises is not an array
                     setExercises([defaultExercise]);
                 }
-    
+
             } else {
                 console.log('Session and client ID from local storage do not match the current session.');
                 // Initialize exercises for a new session
@@ -437,10 +452,24 @@ const TrackWorkoutSession = () => {
             setExercises([defaultExercise]);
         }
     }, [sessionId, clientId]);
-    
-    
-    
-    
+
+
+    // Handle exercise search
+    const filterExercises = (inputValue) => {
+        if (!inputValue.trim()) return [];
+        return availableExercises.filter(exercise =>
+            exercise.Name.toLowerCase().includes(inputValue.toLowerCase())
+        );
+    };
+
+
+    // Handle exercise input change
+    const handleExerciseInputChange = (index, value) => {
+        const newExercises = [...exercises];
+        newExercises[index].inputValue = value;
+        setExercises(newExercises);
+    };
+
 
 
     return (
@@ -457,15 +486,39 @@ const TrackWorkoutSession = () => {
                     return (
                         <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
                             {supersetHeading}
-                            <select className="exercise-selector"
-                                value={exercise.id || ''}
-                                onChange={(e) => handleExerciseChange(exerciseIndex, e.target.value)}
-                            >
-                                <option value="">Select an exercise</option>
-                                {availableExercises.map((ex) => (
-                                    <option key={ex.ExerciseID} value={ex.ExerciseID}>{ex.Name}</option>
-                                ))}
-                            </select>
+                            <div className="exercise-selector">
+                                <input
+                                    type="text"
+                                    placeholder="Type to search exercises..."
+                                    value={exercise.inputValue || ''}
+                                    className="exercise-search-input"
+                                    onChange={(e) => {
+                                        handleExerciseInputChange(exerciseIndex, e.target.value);
+                                        setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true });
+                                    }}
+                                    onFocus={() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true })}
+                                    onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
+
+                                />
+                                {/* Suggestions dropdown */}
+                                {isDropdownVisible[exerciseIndex] && (
+                                    <ul className="exercise-suggestions">
+                                        {filterExercises(exercise.inputValue).map(ex => (
+                                            <li
+                                                key={ex.ExerciseID}
+                                                onClick={() => {
+                                                    console.log("Selected exercise:", ex.Name, "with ID:", ex.ExerciseID);
+                                                    handleExerciseSelect(exerciseIndex, ex);
+                                                    setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false });
+                                                }}>
+                                                {ex.Name}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                )}
+                            </div>
+
                             <button className="track-workout-button" type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
                             <button className="track-workout-button" type="button" onClick={() => toggleSlideOver(exercise.id)}>
                                 View Exercise History

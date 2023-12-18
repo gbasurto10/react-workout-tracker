@@ -8,6 +8,8 @@ import WorkoutSession from './components/tracking-components/WorkoutSession';
 import TrackWorkoutSession from './components/tracking-components/TrackWorkoutSession';
 import CreateClient from './components/tracking-components/CreateClient';
 import './App.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 function BackButton() {
   let navigate = useNavigate();
@@ -18,7 +20,7 @@ function BackButton() {
 
   return (
     <button onClick={goBack} className="back-button">
-      &#8592; Back
+      <FontAwesomeIcon icon={faArrowLeft} /> {/* Replace text with icon */}
     </button>
   );
 }
@@ -43,8 +45,9 @@ function LogoutButton() {
 function Footer() {
   return (
     <footer className="app-footer">
-      <Link to="/clients">Home</Link>
-      {/* Add more navigation links or icons as needed */}
+      <Link to="/clients">
+        <FontAwesomeIcon icon={faHome} />
+      </Link>
     </footer>
   );
 }
@@ -66,24 +69,24 @@ function Main() {
   return (
     <>
       {location.pathname !== '/' && (
-         <nav className="navbar">
+        <nav className="navbar">
           <div>
             {!isClientScreen && <BackButton />}
           </div>
           <LogoutButton />
         </nav>
       )}
-       <div className="main-content">
-      <Routes>
-        <Route exact path="/" element={<LoginScreen />} />
-        <Route path="/register" element={<RegisterScreen />} />
-        <Route path="/clients" element={<ClientScreen />} />
-        <Route path="/client-workout-sessions/:clientId" element={<ClientWorkoutSessions />} />
-        <Route path="/workout-session/:sessionId/:clientId" element={<WorkoutSession />} />
-        <Route path="/track-workout-session/:sessionId/:clientId" element={<TrackWorkoutSession />} />
-        <Route path="/ClientWorkoutSessions" element={<ClientWorkoutSessions />} />
-        <Route path="/create-client" element={<CreateClient />} />
-      </Routes>
+      <div className="main-content">
+        <Routes>
+          <Route exact path="/" element={<LoginScreen />} />
+          <Route path="/register" element={<RegisterScreen />} />
+          <Route path="/clients" element={<ClientScreen />} />
+          <Route path="/client-workout-sessions/:clientId" element={<ClientWorkoutSessions />} />
+          <Route path="/workout-session/:sessionId/:clientId" element={<WorkoutSession />} />
+          <Route path="/track-workout-session/:sessionId/:clientId" element={<TrackWorkoutSession />} />
+          <Route path="/ClientWorkoutSessions" element={<ClientWorkoutSessions />} />
+          <Route path="/create-client" element={<CreateClient />} />
+        </Routes>
       </div>
       {location.pathname !== '/' && <Footer />}
     </>

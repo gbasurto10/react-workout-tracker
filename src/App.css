@@ -34,10 +34,12 @@ body, html {
 .navbar .back-button {
   color: #333;
   border: 1px solid #ddd;
+  background-color: transparent;
+  
 }
 
 .navbar .back-button:hover, .navbar .back-button:active {
-  background-color: #f0f0f0; /* Feedback on touch */
+  background-color: #d0d0d0; /* Darker shade for touch feedback */
 }
 
 .navbar .logout-button {
@@ -75,12 +77,13 @@ body, html {
   border-top: 1px solid #ddd;
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.2); /* Optional shadow for depth */
   z-index: 1000;
+  padding-bottom: 1rem;
 }
 
 .app-footer a {
   text-decoration: none;
-  color: #333;
-  font-size: 1rem;
+  color: lightgrey;
+  font-size: 1.5rem;
 }
 
 /* Session List Styles */
