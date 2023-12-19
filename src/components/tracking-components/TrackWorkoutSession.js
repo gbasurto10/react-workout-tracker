@@ -14,14 +14,16 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/styles.css';
 
 
-
 const defaultExercise = {
     name: '',
     type: '',
     sets: [{ reps: '', weight: '' }],
-    inputValue: ''
+    inputValue: '',
+    trackTime: false,
+    trackDistance: false,
+    trackWeight: false,
+    trackReps: false
 };
-
 
 const TrackWorkoutSession = () => {
     const [sessionDetails, setSessionDetails] = useState(null);
@@ -36,18 +38,19 @@ const TrackWorkoutSession = () => {
     const [newSupersetSize, setNewSupersetSize] = useState(0);
     const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
     const [isDropdownVisible, setIsDropdownVisible] = useState({});
+    const [isCreateExerciseModalOpen, setIsCreateExerciseModalOpen] = useState(false);
+
+    const [newExerciseData, setNewExerciseData] = useState({
+        name: '',
+        type: '',
+        trackTime: false,
+        trackDistance: false,
+        trackWeight: false,
+        trackReps: false
+    });
 
 
 
-
-
-
-
-    // Mock exercise history data
-    const mockExerciseHistory = [
-        { date: "2023-03-01", exercise: "Squats", sets: 3, reps: 12, weight: 100 },
-        { date: "2023-03-05", exercise: "Deadlift", sets: 4, reps: 10, weight: 150 },
-    ];
     const slideOverStyles = {
         position: 'fixed',
         top: 0,
@@ -67,8 +70,6 @@ const TrackWorkoutSession = () => {
     const slideOverOpenStyles = {
         transform: 'translateX(0)',
     };
-
-
 
 
 
@@ -190,11 +191,6 @@ const TrackWorkoutSession = () => {
     };
 
 
-
-
-
-
-
     const addExercise = () => {
         const newExercise = {
             ...defaultExercise,
@@ -307,6 +303,34 @@ const TrackWorkoutSession = () => {
         }
         setIsSlideOverOpen(!isSlideOverOpen);
     };
+
+    const handleCreateNewExercise = async (event) => {
+        event.preventDefault();
+        console.log('Creating new exercise with data:', newExerciseData);
+
+        try {
+            // Ensure newExerciseData is structured as required by your backend
+            const exerciseDataToSend = {
+                name: newExerciseData.name,
+                type: newExerciseData.type,
+                tracksTime: newExerciseData.trackTime,
+                tracksDistance: newExerciseData.trackDistance,
+                tracksWeight: newExerciseData.trackWeight,
+                tracksReps: newExerciseData.trackReps
+            };
+
+            console.log('Sending data to create new exercise:', exerciseDataToSend);
+
+            await createNewExercise(exerciseDataToSend);
+
+            toggleCreateExerciseModal();
+            // Handle success - e.g., close the modal, clear form, refresh exercises list
+        } catch (error) {
+            console.error('Error creating new exercise:', error);
+            // Handle error in UI
+        }
+    };
+
 
 
 
@@ -459,6 +483,20 @@ const TrackWorkoutSession = () => {
         setExercises(newExercises);
     };
 
+    // Toggle the Modal State
+    const toggleCreateExerciseModal = () => {
+        setIsCreateExerciseModalOpen(!isCreateExerciseModalOpen);
+    };
+
+    // Checkbox onChange handlers
+    const handleCheckboxChange = (property, value) => {
+        setNewExerciseData(prevData => ({
+            ...prevData,
+            [property]: value
+        }));
+    };
+
+
 
 
     return (
@@ -538,13 +576,12 @@ const TrackWorkoutSession = () => {
                         );
                     })}
                     <button className="track-workout-button" type="button" onClick={addExercise}>Add Exercise</button>
-                    <button className="track-workout-button" type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
+                    <button type="button" className="track-workout-button" onClick={toggleCreateExerciseModal}>Create New Exercise</button>
                     <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
                 </div>
                 <div className="track-workout-sticky-buttons">
                     <button className="save-workout-button" type="submit">Save Workout</button>
                     <button className="delete-workout-button" type="button" onClick={handleDeleteWorkout}>Delete Workout</button>
-
                 </div>
             </div>
 
@@ -566,6 +603,66 @@ const TrackWorkoutSession = () => {
                     <button className="track-workout-button" onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
+
+            {isCreateExerciseModalOpen && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="modal-close-btn" onClick={toggleCreateExerciseModal}>×</button>
+                        <form className="modal-form" onSubmit={handleCreateNewExercise}>
+                            <input
+                                type="text"
+                                placeholder="Exercise Name"
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, name: e.target.value })}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Exercise Type"
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, type: e.target.value })}
+                            />
+
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackTime', e.target.checked)}
+                                    /> Track Time
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackDistance', e.target.checked)}
+                                    /> Track Distance
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackWeight', e.target.checked)}
+                                    /> Track Weight
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackReps', e.target.checked)}
+                                    /> Track Reps
+                                </label>
+                            </div>
+
+                            <button type="submit" className="button" onClick={handleCreateNewExercise}>Create Exercise</button>
+                            <button type="button" className="button" onClick={toggleCreateExerciseModal}>Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+
+
+
         </form>
 
     );
