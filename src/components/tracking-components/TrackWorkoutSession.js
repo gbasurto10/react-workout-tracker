@@ -77,7 +77,6 @@ const TrackWorkoutSession = () => {
         const loadSessionExercises = async () => {
             try {
                 let sessionExercisesData = await fetchSessionExercises(sessionId);
-                console.log("Session Exercises Data:", sessionExercisesData);
 
                 // Sort by OrderID
                 sessionExercisesData.sort((a, b) => a.OrderID - b.OrderID);
@@ -141,7 +140,6 @@ const TrackWorkoutSession = () => {
         // Load from local storage if available, otherwise load from the API
         const savedSession = localStorage.getItem('workoutSession');
         if (savedSession) {
-            console.log('Loaded from localStorage:', savedSession);
             const sessionData = JSON.parse(savedSession);
 
             // Update each exercise to include the inputValue field
@@ -179,7 +177,6 @@ const TrackWorkoutSession = () => {
 
     // Handle exercise selection
     const handleExerciseSelect = (index, selectedExercise) => {
-        console.log('Selected exercise:', selectedExercise, 'at index:', index);
         const newExercises = [...exercises];
         newExercises[index] = {
             ...newExercises[index],
@@ -211,7 +208,6 @@ const TrackWorkoutSession = () => {
 
 
     const addSet = (exerciseIndex) => {
-        console.log("Current sets for exercise at index", exerciseIndex, ":", exercises[exerciseIndex].sets);
         const newExercises = [...exercises];
         newExercises[exerciseIndex].sets.push({ reps: '', weight: '' });
         setExercises(newExercises);
@@ -219,7 +215,6 @@ const TrackWorkoutSession = () => {
 
     const removeExercise = (index) => {
         const exerciseToRemove = exercises[index];
-        console.log('Removing exercise:', exerciseToRemove, 'at index:', index);
 
         const newExercises = exercises.filter((_, i) => i !== index);
         setExercises(newExercises);
@@ -232,8 +227,6 @@ const TrackWorkoutSession = () => {
 
     const removeSet = (exerciseIndex, setIndex) => {
         const setToRemove = exercises[exerciseIndex].sets[setIndex];
-        console.log('Removing set:', setToRemove, 'from exercise at index:', exerciseIndex);
-
         const newExercises = [...exercises];
         newExercises[exerciseIndex].sets = newExercises[exerciseIndex].sets.filter((_, i) => i !== setIndex);
         setExercises(newExercises);
@@ -272,7 +265,6 @@ const TrackWorkoutSession = () => {
             // Mark the session as finished
             await finishWorkoutSession(sessionId);
 
-            console.log('Workout session saved and marked as finished');
             // Handle post-save actions (e.g., navigate or show a message)
 
             // Clear local storage
@@ -312,7 +304,6 @@ const TrackWorkoutSession = () => {
     const toggleSlideOver = async (exerciseId) => {
         if (!isSlideOverOpen) {
             await loadExerciseHistory(exerciseId);
-            console.log("Exercise History:", exerciseHistory);
         }
         setIsSlideOverOpen(!isSlideOverOpen);
     };
@@ -416,7 +407,6 @@ const TrackWorkoutSession = () => {
             };
 
             localStorage.setItem('workoutSession', JSON.stringify(sessionData));
-            console.log('Saved to localStorage:', sessionData);
 
             return newExercises;
         });
@@ -443,7 +433,6 @@ const TrackWorkoutSession = () => {
                 }
 
             } else {
-                console.log('Session and client ID from local storage do not match the current session.');
                 // Initialize exercises for a new session
                 setExercises([defaultExercise]);
             }
@@ -475,82 +464,83 @@ const TrackWorkoutSession = () => {
     return (
         <form onSubmit={handleSubmit}>
             <div className="track-workout-container">
-                <h2 className="header">Track Workout Session</h2>
-                {exercises.map((exercise, exerciseIndex) => {
-                    let supersetHeading = null;
-                    if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
-                        supersetHeading = <h3 className="superset-header">Superset {exercise.supersetId}</h3>;
-                        lastSupersetId = exercise.supersetId;
-                    }
+                <div className="main-workout-view">
+                    <h2 className="header">Track Workout Session</h2>
+                    {exercises.map((exercise, exerciseIndex) => {
+                        let supersetHeading = null;
+                        if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
+                            supersetHeading = <h3 className="superset-header">Superset {exercise.supersetId}</h3>;
+                            lastSupersetId = exercise.supersetId;
+                        }
 
-                    return (
-                        <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
-                            {supersetHeading}
-                            <div className="exercise-selector">
-                                <input
-                                    type="text"
-                                    placeholder="Type to search exercises..."
-                                    value={exercise.inputValue || ''}
-                                    className="exercise-search-input"
-                                    onChange={(e) => {
-                                        handleExerciseInputChange(exerciseIndex, e.target.value);
-                                        setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true });
-                                    }}
-                                    onFocus={() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true })}
-                                    onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
-
-                                />
-                                {/* Suggestions dropdown */}
-                                {isDropdownVisible[exerciseIndex] && (
-                                    <ul className="exercise-suggestions">
-                                        {filterExercises(exercise.inputValue).map(ex => (
-                                            <li
-                                                key={ex.ExerciseID}
-                                                onClick={() => {
-                                                    console.log("Selected exercise:", ex.Name, "with ID:", ex.ExerciseID);
-                                                    handleExerciseSelect(exerciseIndex, ex);
-                                                    setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false });
-                                                }}>
-                                                {ex.Name}
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                )}
-                            </div>
-
-                            <button className="track-workout-button" type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
-                            <button className="track-workout-button" type="button" onClick={() => toggleSlideOver(exercise.id)}>
-                                View Exercise History
-                            </button>
-                            {exercise.sets.map((set, setIndex) => (
-                                <div key={setIndex} className="set-section">
+                        return (
+                            <div key={exerciseIndex} className={`exercise-section ${exercise.supersetId ? 'superset-exercise' : ''}`}>
+                                {supersetHeading}
+                                <div className="exercise-selector">
                                     <input
-                                        className="set-input"
-                                        type="number"
-                                        placeholder="Reps"
-                                        value={set.reps || ''}
-                                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
+                                        type="text"
+                                        placeholder="Type to search exercises..."
+                                        value={exercise.inputValue || ''}
+                                        className="exercise-search-input"
+                                        onChange={(e) => {
+                                            handleExerciseInputChange(exerciseIndex, e.target.value);
+                                            setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true });
+                                        }}
+                                        onFocus={() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: true })}
+                                        onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
+
                                     />
-                                    <input
-                                        className="set-input"
-                                        type="number"
-                                        placeholder="Weight"
-                                        value={set.weight || ''}
-                                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
-                                    />
-                                    <button className="track-workout-button" type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
+                                    {/* Suggestions dropdown */}
+                                    {isDropdownVisible[exerciseIndex] && (
+                                        <ul className="exercise-suggestions">
+                                            {filterExercises(exercise.inputValue).map(ex => (
+                                                <li
+                                                    key={ex.ExerciseID}
+                                                    onClick={() => {
+                                                        handleExerciseSelect(exerciseIndex, ex);
+                                                        setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false });
+                                                    }}>
+                                                    {ex.Name}
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                    )}
                                 </div>
-                            ))}
-                            <button className="track-workout-button" type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
-                            <button className="track-workout-button" type="button" onClick={() => moveExerciseUp(exerciseIndex)}>Move Up</button>
-                            <button className="track-workout-button" type="button" onClick={() => moveExerciseDown(exerciseIndex)}>Move Down</button>
-                        </div>
-                    );
-                })}
-                <button className="track-workout-button" type="button" onClick={addExercise}>Add Exercise</button>
-                <button className="track-workout-button" type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
-                <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
+
+                                <button className="track-workout-button" type="button" onClick={() => removeExercise(exerciseIndex)}>Remove Exercise</button>
+                                <button className="track-workout-button" type="button" onClick={() => toggleSlideOver(exercise.id)}>
+                                    View Exercise History
+                                </button>
+                                {exercise.sets.map((set, setIndex) => (
+                                    <div key={setIndex} className="set-section">
+                                        <input
+                                            className="set-input"
+                                            type="number"
+                                            placeholder="Reps"
+                                            value={set.reps || ''}
+                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
+                                        />
+                                        <input
+                                            className="set-input"
+                                            type="number"
+                                            placeholder="Weight"
+                                            value={set.weight || ''}
+                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
+                                        />
+                                        <button className="track-workout-button" type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
+                                    </div>
+                                ))}
+                                <button className="track-workout-mod-button" type="button" onClick={() => addSet(exerciseIndex)}>Add Set</button>
+                                <button className="track-workout-mod-button" type="button" onClick={() => moveExerciseUp(exerciseIndex)}>Move Up</button>
+                                <button className="track-workout-mod-button" type="button" onClick={() => moveExerciseDown(exerciseIndex)}>Move Down</button>
+                            </div>
+                        );
+                    })}
+                    <button className="track-workout-button" type="button" onClick={addExercise}>Add Exercise</button>
+                    <button className="track-workout-button" type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
+                    <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
+                </div>
                 <div className="track-workout-sticky-buttons">
                     <button className="save-workout-button" type="submit">Save Workout</button>
                     <button className="delete-workout-button" type="button" onClick={handleDeleteWorkout}>Delete Workout</button>
