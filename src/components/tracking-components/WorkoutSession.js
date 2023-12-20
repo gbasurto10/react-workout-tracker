@@ -17,8 +17,8 @@ const WorkoutSession = () => {
                 const response = await fetchSessionDetails(sessionId);
                 // Process the response to group sets by exercise and SupersetID
                 const exercisesWithSets = response.Exercises.reduce((acc, current) => {
-                    const { ExerciseID, Name, Type, SetNumber, Reps, Weight, SupersetID } = current;
-                    const set = { SetNumber, Reps, Weight };
+                    const { ExerciseID, Name, Type, SetNumber, Reps, Weight, Distance, Time, SupersetID } = current;
+                    const set = { SetNumber, Reps, Weight, Distance, Time };
                     const foundExercise = acc.find(ex => ex.ExerciseID === ExerciseID && ex.SupersetID === SupersetID);
                     if (foundExercise) {
                         foundExercise.Sets.push(set);
@@ -53,29 +53,35 @@ const WorkoutSession = () => {
             <p className="workout-session-description">Description: {sessionDetails.Description}</p>
     
             {/* Filter and render non-superset exercises first */}
-            {sessionDetails.Exercises.filter(exercise => exercise.SupersetID === null).map((exercise, index) => (
-                <div key={exercise.ExerciseID} className="exercise-container">
-                    <h4 className="exercise-header">{exercise.Name}</h4>
-                    <table className="workout-table">
-                        <thead>
-                            <tr>
-                                <th>Set</th>
-                                <th>Reps</th>
-                                <th>Weight</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {exercise.Sets.map((set, setIndex) => (
-                                <tr key={setIndex}>
-                                    <td>{set.SetNumber}</td>
-                                    <td>{set.Reps}</td>
-                                    <td>{set.Weight}</td>
+            {sessionDetails.Exercises.filter(exercise => exercise.SupersetID === null).map((exercise, index) => {
+                return (
+                    <div key={exercise.ExerciseID} className="exercise-container">
+                        <h4 className="exercise-header">{exercise.Name}</h4>
+                        <table className="workout-table">
+                            <thead>
+                                <tr>
+                                    <th>Set</th>
+                                    {exercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
+                                    {exercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
+                                    {exercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
+                                    {exercise.Sets[0].Time !== null ? <th>Time</th> : null}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ))}
+                            </thead>
+                            <tbody>
+                                {exercise.Sets.map((set, setIndex) => (
+                                    <tr key={setIndex}>
+                                        <td>{set.SetNumber}</td>
+                                        {set.Reps !== null ? <td>{set.Reps}</td> : null}
+                                        {set.Weight !== null ? <td>{set.Weight}</td> : null}
+                                        {set.Distance !== null ? <td>{set.Distance}</td> : null}
+                                        {set.Time !== null ? <td>{set.Time}</td> : null}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            })}
     
             {/* Then find and render supersets */}
             {sessionDetails.Exercises
@@ -95,16 +101,20 @@ const WorkoutSession = () => {
                                         <thead>
                                             <tr>
                                                 <th>Set</th>
-                                                <th>Reps</th>
-                                                <th>Weight</th>
+                                                {exercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
+                                                {exercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
+                                                {exercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
+                                                {exercise.Sets[0].Time !== null ? <th>Time</th> : null}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {exercise.Sets.map((set, setIndex) => (
                                                 <tr key={setIndex}>
                                                     <td>{set.SetNumber}</td>
-                                                    <td>{set.Reps}</td>
-                                                    <td>{set.Weight}</td>
+                                                    {set.Reps !== null ? <td>{set.Reps}</td> : null}
+                                                    {set.Weight !== null ? <td>{set.Weight}</td> : null}
+                                                    {set.Distance !== null ? <td>{set.Distance}</td> : null}
+                                                    {set.Time !== null ? <td>{set.Time}</td> : null}
                                                 </tr>
                                             ))}
                                         </tbody>
