@@ -199,6 +199,7 @@ export const fetchSessionExercises = async (sessionId) => {
     }
 
     return response.json();
+    console.log("Fetched Session Exercises: ", response.json()); // Log the JSON response
 }
 
 

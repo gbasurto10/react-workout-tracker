@@ -19,10 +19,10 @@ const defaultExercise = {
     type: '',
     sets: [{ reps: '', weight: '' }],
     inputValue: '',
-    trackTime: false,
-    trackDistance: false,
-    trackWeight: false,
-    trackReps: false
+    tracksTime: false,
+    tracksDistance: false,
+    tracksWeight: false,
+    tracksReps: false
 };
 
 const TrackWorkoutSession = () => {
@@ -113,18 +113,40 @@ const TrackWorkoutSession = () => {
                         sessionExerciseID: exercise.SessionExerciseID,
                         reps: exercise.Reps,
                         weight: exercise.Weight,
-                        setNumber: exercise.SetNumber
+                        setNumber: exercise.SetNumber,
+                        time: exercise.Time,
+                        distance: exercise.Distance
                     });
                 });
 
-                // Flatten the supersets into a sorted array
+                console.log('Session Data:', sessionExercisesData);
+
+                // Flatten the supersets into a sorted array and process tracking flags
                 let exercisesArray = [];
                 Object.values(supersets).forEach(superset => {
                     Object.values(superset).forEach(exercise => {
+                        // Initialize tracking flags
+                        let tracksReps = false;
+                        let tracksWeight = false;
+                        let tracksTime = false;
+                        let tracksDistance = false;
+
+                        // Determine which metrics are being tracked
+                        exercise.sets.forEach(set => {
+                            if (set.reps != null) tracksReps = true;
+                            if (set.weight != null) tracksWeight = true;
+                            if (set.time != null) tracksTime = true;
+                            if (set.distance != null) tracksDistance = true;
+                        });
+
                         exercisesArray.push({
                             ...exercise,
-                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber), // Ensure sets are sorted
-                            inputValue: exercise.name // Set the inputValue to the exercise name
+                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber),
+                            inputValue: exercise.name, // Set the inputValue to the exercise name
+                            tracksDistance,
+                            tracksReps,
+                            tracksTime,
+                            tracksWeight
                         });
                     });
                 });
@@ -132,6 +154,7 @@ const TrackWorkoutSession = () => {
                 // Sort by OrderID to maintain the overall order
                 exercisesArray.sort((a, b) => a.order - b.order);
 
+                console.log('Fetched exercises:', exercisesArray);
                 setExercises(exercisesArray);
             } catch (err) {
                 console.error('Error loading session exercises:', err);
@@ -146,7 +169,7 @@ const TrackWorkoutSession = () => {
             // Update each exercise to include the inputValue field
             const updatedExercises = sessionData.exercises.map(exercise => ({
                 ...exercise,
-                inputValue: exercise.name || '' // Set the inputValue to the exercise name, or default to an empty string
+                inputValue: exercise.name || ''
             }));
 
             setExercises(updatedExercises);
@@ -158,13 +181,10 @@ const TrackWorkoutSession = () => {
 
 
 
-
-
-
-
     // Function to load exercises
     const loadExercises = async () => {
         const exercisesData = await fetchExercises();
+        console.log('Exercises:', exercisesData);
 
         exercisesData.sort((a, b) => a.Name.localeCompare(b.Name));
 
@@ -184,22 +204,30 @@ const TrackWorkoutSession = () => {
             id: selectedExercise.ExerciseID,
             name: selectedExercise.Name,
             type: selectedExercise.Type,
-            inputValue: selectedExercise.Name // Keep the selected exercise name
+            tracksDistance: !!selectedExercise.TracksDistance, // Use double NOT to convert to boolean if necessary
+            tracksReps: !!selectedExercise.TracksReps,
+            tracksTime: !!selectedExercise.TracksTime,
+            tracksWeight: !!selectedExercise.TracksWeight,
+            inputValue: selectedExercise.Name
         };
         setExercises(newExercises);
         setIsDropdownVisible({ ...isDropdownVisible, [index]: false }); // Hide the dropdown
+
+        console.log('Selected exercise:', newExercises[index]);
     };
+
 
 
     const addExercise = () => {
         const newExercise = {
             ...defaultExercise,
-            sets: [{ reps: '', weight: '' }],
+            sets: [{ reps: '', weight: '', time: '', distance: '' }], // Include placeholders for all metrics
             order: exercises.length + 1 // Assign the next OrderID
         };
 
         setExercises([...exercises, newExercise]);
     };
+
 
 
 
@@ -242,10 +270,13 @@ const TrackWorkoutSession = () => {
             sets: exercise.sets.map((set, setIndex) => ({
                 SetNumber: setIndex + 1,  // Assign set number based on the index
                 Reps: set.reps,
-                Weight: set.weight
+                Weight: set.weight,
+                Time: set.time || null,  // Include Time, allow null
+                Distance: set.distance || null,  // Include Distance, allow null
             }))
         }));
     }
+
 
 
 
@@ -256,6 +287,7 @@ const TrackWorkoutSession = () => {
         try {
             // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
+            console.log('Data being sent for saving:', { sessionId, preparedExercises }); // Add this line to log the data
             await saveWorkoutSession(sessionId, preparedExercises);
 
             // Mark the session as finished
@@ -273,6 +305,7 @@ const TrackWorkoutSession = () => {
             // Handle error
         }
     };
+
 
     const handleDeleteWorkout = () => {
         if (window.confirm('Are you sure you want to delete this workout?')) {
@@ -497,6 +530,65 @@ const TrackWorkoutSession = () => {
     };
 
 
+    // Dynamically Generate Input Fields for Exercises
+    function renderExerciseInputs(exercise, exerciseIndex, setIndex) {
+        return (
+            <>
+                {/* Render reps input if tracksReps is true */}
+                {exercise.tracksReps && (
+                    <input
+                        type="number"
+                        value={exercise.sets[setIndex].reps}
+                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
+                        placeholder="Reps"
+                    />
+                )}
+
+                {/* Render weight input if tracksWeight is true */}
+                {exercise.tracksWeight && (
+                    <input
+                        type="number"
+                        value={exercise.sets[setIndex].weight}
+                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
+                        placeholder="Weight"
+                    />
+                )}
+
+                {/* Render time input if tracksTime is true */}
+                {exercise.tracksTime && (
+                    <div>
+                        <input
+                            type="number"
+                            value={exercise.sets[setIndex].time}
+                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'time', e.target.value)}
+                            placeholder="Duration (seconds)"
+                        />
+                        <span>seconds</span>
+                    </div>
+                )}
+
+                {/* Render distance input if tracksDistance is true */}
+                {exercise.tracksDistance && (
+                    <div>
+                        <input
+                            type="number"
+                            value={exercise.sets[setIndex].distance}
+                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'distance', e.target.value)}
+                            placeholder="Distance (meters)"
+                        />
+                        <span>meters</span>
+                    </div>
+                )}
+
+            </>
+        );
+    }
+
+
+
+
+
+
 
 
     return (
@@ -528,7 +620,6 @@ const TrackWorkoutSession = () => {
                                         onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
 
                                     />
-                                    {/* Suggestions dropdown */}
                                     {isDropdownVisible[exerciseIndex] && (
                                         <ul className="exercise-suggestions">
                                             {filterExercises(exercise.inputValue).map(ex => (
@@ -552,20 +643,7 @@ const TrackWorkoutSession = () => {
                                 </button>
                                 {exercise.sets.map((set, setIndex) => (
                                     <div key={setIndex} className="set-section">
-                                        <input
-                                            className="set-input"
-                                            type="number"
-                                            placeholder="Reps"
-                                            value={set.reps || ''}
-                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
-                                        />
-                                        <input
-                                            className="set-input"
-                                            type="number"
-                                            placeholder="Weight"
-                                            value={set.weight || ''}
-                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
-                                        />
+                                        {renderExerciseInputs(exercise, exerciseIndex, setIndex)}
                                         <button className="track-workout-button" type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
                                     </div>
                                 ))}
