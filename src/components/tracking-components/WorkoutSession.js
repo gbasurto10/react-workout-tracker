@@ -10,6 +10,9 @@ const WorkoutSession = () => {
     const { sessionId, clientId } = useParams();
     const [sessionDetails, setSessionDetails] = useState(null);
     const navigate = useNavigate();
+    const isSuperset = (exercise, exercises) => {
+        return exercises.some(e => e.SupersetID === exercise.SupersetID && e.ExerciseID !== exercise.ExerciseID);
+    };
 
     useEffect(() => {
         const loadSessionDetails = async () => {
@@ -28,12 +31,18 @@ const WorkoutSession = () => {
                             Name,
                             Type,
                             Sets: [set],
-                            SupersetID
+                            SupersetID,
+                            OrderID: current.OrderID // Include OrderID here
                         });
                     }
                     return acc;
                 }, []);
+
+                // Sort the exercises by OrderID
+                exercisesWithSets.sort((a, b) => a.OrderID - b.OrderID);
+
                 setSessionDetails({ ...response, Exercises: exercisesWithSets });
+                console.log('Session details:', response);
             } catch (error) {
                 console.error('Error fetching session details:', error);
             }
@@ -41,6 +50,7 @@ const WorkoutSession = () => {
 
         loadSessionDetails();
     }, [sessionId]);
+
 
     if (!sessionDetails) {
         return <div>Loading...</div>;
@@ -51,64 +61,32 @@ const WorkoutSession = () => {
             <h2 className="header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
             <p className="workout-session-description">Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
             <p className="workout-session-description">Description: {sessionDetails.Description}</p>
-    
-            {/* Filter and render non-superset exercises first */}
-            {sessionDetails.Exercises.filter(exercise => exercise.SupersetID === null).map((exercise, index) => {
-                return (
-                    <div key={exercise.ExerciseID} className="exercise-container">
-                        <h4 className="exercise-header">{exercise.Name}</h4>
-                        <table className="workout-table">
-                            <thead>
-                                <tr>
-                                    <th>Set</th>
-                                    {exercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
-                                    {exercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
-                                    {exercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
-                                    {exercise.Sets[0].Time !== null ? <th>Time</th> : null}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {exercise.Sets.map((set, setIndex) => (
-                                    <tr key={setIndex}>
-                                        <td>{set.SetNumber}</td>
-                                        {set.Reps !== null ? <td>{set.Reps}</td> : null}
-                                        {set.Weight !== null ? <td>{set.Weight}</td> : null}
-                                        {set.Distance !== null ? <td>{set.Distance}</td> : null}
-                                        {set.Time !== null ? <td>{set.Time}</td> : null}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                );
-            })}
-    
-            {/* Then find and render supersets */}
-            {sessionDetails.Exercises
-                .filter((exercise, index, self) =>
-                    exercise.SupersetID !== null &&
-                    index === self.findIndex(e => e.SupersetID === exercise.SupersetID)
-                )
-                .map(supersetExercise => {
-                    const exercisesInSuperset = sessionDetails.Exercises.filter(e => e.SupersetID === supersetExercise.SupersetID);
+
+            {/* Render exercises and supersets in the order of OrderID */}
+            {sessionDetails.Exercises.map((exercise, index) => {
+                // Check if this is the first exercise of a superset
+                if (exercise.SupersetID && sessionDetails.Exercises.findIndex(e => e.SupersetID === exercise.SupersetID) === index) {
+                    // Render the superset header and exercises
+                    const exercisesInSuperset = sessionDetails.Exercises.filter(e => e.SupersetID === exercise.SupersetID);
                     return (
-                        <div key={`superset-${supersetExercise.SupersetID}`} className="superset-container">
+                        <div key={`superset-${exercise.SupersetID}`} className="superset-container">
                             <h3 className="superset-header">Superset</h3>
-                            {exercisesInSuperset.map(exercise => (
-                                <div key={exercise.ExerciseID} className="exercise-container">
-                                    <h4 className="exercise-header">{exercise.Name}</h4>
+                            {exercisesInSuperset.map(supersetExercise => (
+                                <div key={supersetExercise.ExerciseID} className="exercise-container">
+                                    <h4 className="exercise-header">{supersetExercise.Name}</h4>
+                                    {/* Render the table for the superset exercise */}
                                     <table className="workout-table">
                                         <thead>
                                             <tr>
                                                 <th>Set</th>
-                                                {exercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
-                                                {exercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
-                                                {exercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
-                                                {exercise.Sets[0].Time !== null ? <th>Time</th> : null}
+                                                {supersetExercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
+                                                {supersetExercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
+                                                {supersetExercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
+                                                {supersetExercise.Sets[0].Time !== null ? <th>Time</th> : null}
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {exercise.Sets.map((set, setIndex) => (
+                                            {supersetExercise.Sets.map((set, setIndex) => (
                                                 <tr key={setIndex}>
                                                     <td>{set.SetNumber}</td>
                                                     {set.Reps !== null ? <td>{set.Reps}</td> : null}
@@ -123,9 +101,40 @@ const WorkoutSession = () => {
                             ))}
                         </div>
                     );
-                })
-            }
-    
+                } else if (!exercise.SupersetID) {
+                    // Render non-superset exercises
+                    return (
+                        <div key={exercise.ExerciseID} className="exercise-container">
+                            <h4 className="exercise-header">{exercise.Name}</h4>
+                            {/* Render the table for the non-superset exercise */}
+                            <table className="workout-table">
+                                <thead>
+                                    <tr>
+                                        <th>Set</th>
+                                        {exercise.Sets[0].Reps !== null ? <th>Reps</th> : null}
+                                        {exercise.Sets[0].Weight !== null ? <th>Weight</th> : null}
+                                        {exercise.Sets[0].Distance !== null ? <th>Distance</th> : null}
+                                        {exercise.Sets[0].Time !== null ? <th>Time</th> : null}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {exercise.Sets.map((set, setIndex) => (
+                                        <tr key={setIndex}>
+                                            <td>{set.SetNumber}</td>
+                                            {set.Reps !== null ? <td>{set.Reps}</td> : null}
+                                            {set.Weight !== null ? <td>{set.Weight}</td> : null}
+                                            {set.Distance !== null ? <td>{set.Distance}</td> : null}
+                                            {set.Time !== null ? <td>{set.Time}</td> : null}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    );
+                }
+                return null;
+            })}
+
             {/* Delete and Update Workout Buttons */}
             <button onClick={() => {
                 if (window.confirm('Are you sure you want to delete this workout?')) {
@@ -141,8 +150,9 @@ const WorkoutSession = () => {
             }}>Update Workout</button>
         </div>
     );
-    
-    
+
+
+
 
 };
 
