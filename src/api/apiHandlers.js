@@ -182,7 +182,6 @@ export async function fetchSessionDetails(sessionId) {
     }
 
     const data = await response.json();
-    console.log("Fetched Session Details: ", data); // Log the JSON response
 
     return data;
 }

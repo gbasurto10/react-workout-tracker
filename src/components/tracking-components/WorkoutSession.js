@@ -61,8 +61,7 @@ const WorkoutSession = () => {
             <h2 className="header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
             <p className="workout-session-description">Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
             <p className="workout-session-description">Description: {sessionDetails.Description}</p>
-
-            {/* Render exercises and supersets in the order of OrderID */}
+    
             {sessionDetails.Exercises.map((exercise, index) => {
                 // Check if this is the first exercise of a superset
                 if (exercise.SupersetID && sessionDetails.Exercises.findIndex(e => e.SupersetID === exercise.SupersetID) === index) {
@@ -70,7 +69,7 @@ const WorkoutSession = () => {
                     const exercisesInSuperset = sessionDetails.Exercises.filter(e => e.SupersetID === exercise.SupersetID);
                     return (
                         <div key={`superset-${exercise.SupersetID}`} className="superset-container">
-                            <h3 className="superset-header">Superset</h3>
+                            <h3 className="superset-header">Superset {exercise.SupersetID}</h3>
                             {exercisesInSuperset.map(supersetExercise => (
                                 <div key={supersetExercise.ExerciseID} className="exercise-container">
                                     <h4 className="exercise-header">{supersetExercise.Name}</h4>
@@ -132,9 +131,10 @@ const WorkoutSession = () => {
                         </div>
                     );
                 }
+                // If it is not the first exercise of a superset, we don't render it again.
                 return null;
             })}
-
+    
             {/* Delete and Update Workout Buttons */}
             <button onClick={() => {
                 if (window.confirm('Are you sure you want to delete this workout?')) {
@@ -150,6 +150,7 @@ const WorkoutSession = () => {
             }}>Update Workout</button>
         </div>
     );
+    
 
 
 
