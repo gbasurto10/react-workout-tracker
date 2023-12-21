@@ -538,6 +538,7 @@ const TrackWorkoutSession = () => {
                 {exercise.tracksReps && (
                     <input
                         type="number"
+                        className="set-input"
                         value={exercise.sets[setIndex].reps}
                         onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
                         placeholder="Reps"
@@ -548,6 +549,7 @@ const TrackWorkoutSession = () => {
                 {exercise.tracksWeight && (
                     <input
                         type="number"
+                        className="set-input"
                         value={exercise.sets[setIndex].weight}
                         onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
                         placeholder="Weight"
@@ -559,6 +561,7 @@ const TrackWorkoutSession = () => {
                     <div>
                         <input
                             type="number"
+                            className="set-input"
                             value={exercise.sets[setIndex].time}
                             onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'time', e.target.value)}
                             placeholder="Duration (seconds)"
@@ -572,6 +575,7 @@ const TrackWorkoutSession = () => {
                     <div>
                         <input
                             type="number"
+                            className="set-input"
                             value={exercise.sets[setIndex].distance}
                             onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'distance', e.target.value)}
                             placeholder="Distance (meters)"

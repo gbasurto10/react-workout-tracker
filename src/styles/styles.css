@@ -395,6 +395,25 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slightly more prominent shadow on focus */
 }
 
+.set-input {
+    width: 15%; /* Adjust width as per requirement */
+    padding: 8px 12px; /* Slightly smaller padding */
+    border: 1px solid #ccc; /* Thinner border for less emphasis */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    color: #333; /* Dark text for readability */
+    background-color: #f9f9f9; /* Slightly off-white background */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    transition: border-color 0.2s ease-in-out; /* Smooth transition for interactions */
+}
+
+.set-input:focus {
+    border-color: #007bff; /* Different highlight color when focused */
+    outline: none; /* Removing default focus outline */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); /* Slightly more prominent shadow on focus */
+}
+
+
 .exercise-suggestions {
     list-style-type: none; /* Remove bullet points */
     padding: 0; /* Reset default padding */
