@@ -7,9 +7,10 @@ import ClientWorkoutSessions from './components/tracking-components/ClientWorkou
 import WorkoutSession from './components/tracking-components/WorkoutSession';
 import TrackWorkoutSession from './components/tracking-components/TrackWorkoutSession';
 import CreateClient from './components/tracking-components/CreateClient';
+import ExerciseLibrary from './components/tracking-components/ExerciseLibrary';
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faArrowLeft, faBook } from '@fortawesome/free-solid-svg-icons';
 
 function BackButton() {
   let navigate = useNavigate();
@@ -47,6 +48,9 @@ function Footer() {
     <footer className="app-footer">
       <Link to="/clients">
         <FontAwesomeIcon icon={faHome} />
+      </Link>
+      <Link to="/exercise-library">
+        <FontAwesomeIcon icon={faBook} />
       </Link>
     </footer>
   );
@@ -86,6 +90,7 @@ function Main() {
           <Route path="/track-workout-session/:sessionId/:clientId" element={<TrackWorkoutSession />} />
           <Route path="/ClientWorkoutSessions" element={<ClientWorkoutSessions />} />
           <Route path="/create-client" element={<CreateClient />} />
+          <Route path="/exercise-library" element={<ExerciseLibrary />} />
         </Routes>
       </div>
       {location.pathname !== '/' && <Footer />}
