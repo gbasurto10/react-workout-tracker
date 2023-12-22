@@ -14,14 +14,16 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/styles.css';
 
 
-
 const defaultExercise = {
     name: '',
     type: '',
     sets: [{ reps: '', weight: '' }],
-    inputValue: ''
+    inputValue: '',
+    tracksTime: false,
+    tracksDistance: false,
+    tracksWeight: false,
+    tracksReps: false
 };
-
 
 const TrackWorkoutSession = () => {
     const [sessionDetails, setSessionDetails] = useState(null);
@@ -36,18 +38,19 @@ const TrackWorkoutSession = () => {
     const [newSupersetSize, setNewSupersetSize] = useState(0);
     const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
     const [isDropdownVisible, setIsDropdownVisible] = useState({});
+    const [isCreateExerciseModalOpen, setIsCreateExerciseModalOpen] = useState(false);
+
+    const [newExerciseData, setNewExerciseData] = useState({
+        name: '',
+        type: '',
+        trackTime: false,
+        trackDistance: false,
+        trackWeight: false,
+        trackReps: false
+    });
 
 
 
-
-
-
-
-    // Mock exercise history data
-    const mockExerciseHistory = [
-        { date: "2023-03-01", exercise: "Squats", sets: 3, reps: 12, weight: 100 },
-        { date: "2023-03-05", exercise: "Deadlift", sets: 4, reps: 10, weight: 150 },
-    ];
     const slideOverStyles = {
         position: 'fixed',
         top: 0,
@@ -67,8 +70,6 @@ const TrackWorkoutSession = () => {
     const slideOverOpenStyles = {
         transform: 'translateX(0)',
     };
-
-
 
 
 
@@ -112,18 +113,40 @@ const TrackWorkoutSession = () => {
                         sessionExerciseID: exercise.SessionExerciseID,
                         reps: exercise.Reps,
                         weight: exercise.Weight,
-                        setNumber: exercise.SetNumber
+                        setNumber: exercise.SetNumber,
+                        time: exercise.Time,
+                        distance: exercise.Distance
                     });
                 });
 
-                // Flatten the supersets into a sorted array
+                console.log('Session Data:', sessionExercisesData);
+
+                // Flatten the supersets into a sorted array and process tracking flags
                 let exercisesArray = [];
                 Object.values(supersets).forEach(superset => {
                     Object.values(superset).forEach(exercise => {
+                        // Initialize tracking flags
+                        let tracksReps = false;
+                        let tracksWeight = false;
+                        let tracksTime = false;
+                        let tracksDistance = false;
+
+                        // Determine which metrics are being tracked
+                        exercise.sets.forEach(set => {
+                            if (set.reps != null) tracksReps = true;
+                            if (set.weight != null) tracksWeight = true;
+                            if (set.time != null) tracksTime = true;
+                            if (set.distance != null) tracksDistance = true;
+                        });
+
                         exercisesArray.push({
                             ...exercise,
-                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber), // Ensure sets are sorted
-                            inputValue: exercise.name // Set the inputValue to the exercise name
+                            sets: exercise.sets.sort((a, b) => a.setNumber - b.setNumber),
+                            inputValue: exercise.name, // Set the inputValue to the exercise name
+                            tracksDistance,
+                            tracksReps,
+                            tracksTime,
+                            tracksWeight
                         });
                     });
                 });
@@ -131,6 +154,7 @@ const TrackWorkoutSession = () => {
                 // Sort by OrderID to maintain the overall order
                 exercisesArray.sort((a, b) => a.order - b.order);
 
+                console.log('Fetched exercises:', exercisesArray);
                 setExercises(exercisesArray);
             } catch (err) {
                 console.error('Error loading session exercises:', err);
@@ -145,7 +169,7 @@ const TrackWorkoutSession = () => {
             // Update each exercise to include the inputValue field
             const updatedExercises = sessionData.exercises.map(exercise => ({
                 ...exercise,
-                inputValue: exercise.name || '' // Set the inputValue to the exercise name, or default to an empty string
+                inputValue: exercise.name || ''
             }));
 
             setExercises(updatedExercises);
@@ -157,13 +181,10 @@ const TrackWorkoutSession = () => {
 
 
 
-
-
-
-
     // Function to load exercises
     const loadExercises = async () => {
         const exercisesData = await fetchExercises();
+        console.log('Exercises:', exercisesData);
 
         exercisesData.sort((a, b) => a.Name.localeCompare(b.Name));
 
@@ -183,27 +204,30 @@ const TrackWorkoutSession = () => {
             id: selectedExercise.ExerciseID,
             name: selectedExercise.Name,
             type: selectedExercise.Type,
-            inputValue: selectedExercise.Name // Keep the selected exercise name
+            tracksDistance: !!selectedExercise.TracksDistance, // Use double NOT to convert to boolean if necessary
+            tracksReps: !!selectedExercise.TracksReps,
+            tracksTime: !!selectedExercise.TracksTime,
+            tracksWeight: !!selectedExercise.TracksWeight,
+            inputValue: selectedExercise.Name
         };
         setExercises(newExercises);
         setIsDropdownVisible({ ...isDropdownVisible, [index]: false }); // Hide the dropdown
+
+        console.log('Selected exercise:', newExercises[index]);
     };
-
-
-
-
 
 
 
     const addExercise = () => {
         const newExercise = {
             ...defaultExercise,
-            sets: [{ reps: '', weight: '' }],
+            sets: [{ reps: '', weight: '', time: '', distance: '' }], // Include placeholders for all metrics
             order: exercises.length + 1 // Assign the next OrderID
         };
 
         setExercises([...exercises, newExercise]);
     };
+
 
 
 
@@ -246,10 +270,13 @@ const TrackWorkoutSession = () => {
             sets: exercise.sets.map((set, setIndex) => ({
                 SetNumber: setIndex + 1,  // Assign set number based on the index
                 Reps: set.reps,
-                Weight: set.weight
+                Weight: set.weight,
+                Time: set.time || null,  // Include Time, allow null
+                Distance: set.distance || null,  // Include Distance, allow null
             }))
         }));
     }
+
 
 
 
@@ -260,6 +287,7 @@ const TrackWorkoutSession = () => {
         try {
             // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
+            console.log('Data being sent for saving:', { sessionId, preparedExercises }); // Add this line to log the data
             await saveWorkoutSession(sessionId, preparedExercises);
 
             // Mark the session as finished
@@ -278,6 +306,7 @@ const TrackWorkoutSession = () => {
         }
     };
 
+
     const handleDeleteWorkout = () => {
         if (window.confirm('Are you sure you want to delete this workout?')) {
             deleteWorkoutSession(sessionId, clientId)
@@ -292,21 +321,43 @@ const TrackWorkoutSession = () => {
     };
 
 
-
-    const handleAddNewExercise = async () => {
-        const newExerciseName = prompt('Enter the name of the new exercise:');
-        if (newExerciseName) {
-            await createNewExercise({ name: newExerciseName, type: 'Strength' }); // example type
-            await loadExercises(); // reload exercises after adding a new one
-        }
-    };
-
     const toggleSlideOver = async (exerciseId) => {
         if (!isSlideOverOpen) {
             await loadExerciseHistory(exerciseId);
         }
         setIsSlideOverOpen(!isSlideOverOpen);
     };
+
+    const handleCreateNewExercise = async (event) => {
+        event.preventDefault();
+        console.log('Creating new exercise with data:', newExerciseData);
+
+        try {
+            // Ensure newExerciseData is structured as required by your backend
+            const exerciseDataToSend = {
+                name: newExerciseData.name,
+                type: newExerciseData.type,
+                tracksTime: newExerciseData.trackTime,
+                tracksDistance: newExerciseData.trackDistance,
+                tracksWeight: newExerciseData.trackWeight,
+                tracksReps: newExerciseData.trackReps
+            };
+
+            console.log('Sending data to create new exercise:', exerciseDataToSend);
+
+            await createNewExercise(exerciseDataToSend);
+
+            toggleCreateExerciseModal();
+            // Handle success - e.g., close the modal, clear form, refresh exercises list
+
+            // Refresh the exercises list
+            await loadExercises();
+        } catch (error) {
+            console.error('Error creating new exercise:', error);
+            // Handle error in UI
+        }
+    };
+
 
 
 
@@ -459,6 +510,83 @@ const TrackWorkoutSession = () => {
         setExercises(newExercises);
     };
 
+    // Toggle the Modal State
+    const toggleCreateExerciseModal = () => {
+        setIsCreateExerciseModalOpen(!isCreateExerciseModalOpen);
+    };
+
+    // Checkbox onChange handlers
+    const handleCheckboxChange = (property, value) => {
+        setNewExerciseData(prevData => ({
+            ...prevData,
+            [property]: value
+        }));
+    };
+
+
+    // Dynamically Generate Input Fields for Exercises
+    function renderExerciseInputs(exercise, exerciseIndex, setIndex) {
+        return (
+            <>
+                {/* Render reps input if tracksReps is true */}
+                {exercise.tracksReps && (
+                    <input
+                        type="number"
+                        className="set-input"
+                        value={exercise.sets[setIndex].reps}
+                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
+                        placeholder="Reps"
+                    />
+                )}
+
+                {/* Render weight input if tracksWeight is true */}
+                {exercise.tracksWeight && (
+                    <input
+                        type="number"
+                        className="set-input"
+                        value={exercise.sets[setIndex].weight}
+                        onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
+                        placeholder="Weight"
+                    />
+                )}
+
+                {/* Render time input if tracksTime is true */}
+                {exercise.tracksTime && (
+                    <div>
+                        <input
+                            type="number"
+                            className="set-input"
+                            value={exercise.sets[setIndex].time}
+                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'time', e.target.value)}
+                            placeholder="Duration (seconds)"
+                        />
+                        <span>seconds</span>
+                    </div>
+                )}
+
+                {/* Render distance input if tracksDistance is true */}
+                {exercise.tracksDistance && (
+                    <div>
+                        <input
+                            type="number"
+                            className="set-input"
+                            value={exercise.sets[setIndex].distance}
+                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'distance', e.target.value)}
+                            placeholder="Distance (meters)"
+                        />
+                        <span>meters</span>
+                    </div>
+                )}
+
+            </>
+        );
+    }
+
+
+
+
+
+
 
 
     return (
@@ -490,7 +618,6 @@ const TrackWorkoutSession = () => {
                                         onBlur={() => setTimeout(() => setIsDropdownVisible({ ...isDropdownVisible, [exerciseIndex]: false }), 300)}
 
                                     />
-                                    {/* Suggestions dropdown */}
                                     {isDropdownVisible[exerciseIndex] && (
                                         <ul className="exercise-suggestions">
                                             {filterExercises(exercise.inputValue).map(ex => (
@@ -514,20 +641,7 @@ const TrackWorkoutSession = () => {
                                 </button>
                                 {exercise.sets.map((set, setIndex) => (
                                     <div key={setIndex} className="set-section">
-                                        <input
-                                            className="set-input"
-                                            type="number"
-                                            placeholder="Reps"
-                                            value={set.reps || ''}
-                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'reps', e.target.value)}
-                                        />
-                                        <input
-                                            className="set-input"
-                                            type="number"
-                                            placeholder="Weight"
-                                            value={set.weight || ''}
-                                            onChange={(e) => handleSetChange(exerciseIndex, setIndex, 'weight', e.target.value)}
-                                        />
+                                        {renderExerciseInputs(exercise, exerciseIndex, setIndex)}
                                         <button className="track-workout-button" type="button" onClick={() => removeSet(exerciseIndex, setIndex)}>Remove Set</button>
                                     </div>
                                 ))}
@@ -538,13 +652,12 @@ const TrackWorkoutSession = () => {
                         );
                     })}
                     <button className="track-workout-button" type="button" onClick={addExercise}>Add Exercise</button>
-                    <button className="track-workout-button" type="button" onClick={handleAddNewExercise}>Create New Exercise</button>
+                    <button type="button" className="track-workout-button" onClick={toggleCreateExerciseModal}>Create New Exercise</button>
                     <button className="track-workout-button" type="button" onClick={handleCreateSuperset}>Create Superset</button>
                 </div>
                 <div className="track-workout-sticky-buttons">
                     <button className="save-workout-button" type="submit">Save Workout</button>
                     <button className="delete-workout-button" type="button" onClick={handleDeleteWorkout}>Delete Workout</button>
-
                 </div>
             </div>
 
@@ -566,6 +679,66 @@ const TrackWorkoutSession = () => {
                     <button className="track-workout-button" onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
+
+            {isCreateExerciseModalOpen && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button className="modal-close-btn" onClick={toggleCreateExerciseModal}>×</button>
+                        <form className="modal-form" onSubmit={handleCreateNewExercise}>
+                            <input
+                                type="text"
+                                placeholder="Exercise Name"
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, name: e.target.value })}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Exercise Type"
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, type: e.target.value })}
+                            />
+
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackTime', e.target.checked)}
+                                    /> Track Time
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackDistance', e.target.checked)}
+                                    /> Track Distance
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackWeight', e.target.checked)}
+                                    /> Track Weight
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => handleCheckboxChange('trackReps', e.target.checked)}
+                                    /> Track Reps
+                                </label>
+                            </div>
+
+                            <button type="submit" className="button" onClick={handleCreateNewExercise}>Create Exercise</button>
+                            <button type="button" className="button" onClick={toggleCreateExerciseModal}>Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+
+
+
         </form>
 
     );

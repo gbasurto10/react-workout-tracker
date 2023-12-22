@@ -182,7 +182,6 @@ export async function fetchSessionDetails(sessionId) {
     }
 
     const data = await response.json();
-    console.log("Fetched Session Details: ", data); // Log the JSON response
 
     return data;
 }
@@ -199,6 +198,7 @@ export const fetchSessionExercises = async (sessionId) => {
     }
 
     return response.json();
+    console.log("Fetched Session Exercises: ", response.json()); // Log the JSON response
 }
 
 
