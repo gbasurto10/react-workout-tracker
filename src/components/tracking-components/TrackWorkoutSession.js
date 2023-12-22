@@ -321,15 +321,6 @@ const TrackWorkoutSession = () => {
     };
 
 
-
-    const handleAddNewExercise = async () => {
-        const newExerciseName = prompt('Enter the name of the new exercise:');
-        if (newExerciseName) {
-            await createNewExercise({ name: newExerciseName, type: 'Strength' }); // example type
-            await loadExercises(); // reload exercises after adding a new one
-        }
-    };
-
     const toggleSlideOver = async (exerciseId) => {
         if (!isSlideOverOpen) {
             await loadExerciseHistory(exerciseId);
@@ -358,6 +349,9 @@ const TrackWorkoutSession = () => {
 
             toggleCreateExerciseModal();
             // Handle success - e.g., close the modal, clear form, refresh exercises list
+
+            // Refresh the exercises list
+            await loadExercises();
         } catch (error) {
             console.error('Error creating new exercise:', error);
             // Handle error in UI
