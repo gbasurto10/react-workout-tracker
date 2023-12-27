@@ -647,7 +647,6 @@ body {
 }
 
 
-
 /* Responsive Styles */
 @media (max-width: 768px) {
     .track-workout-container {
@@ -671,4 +670,42 @@ body {
         padding: 8px 10px;
         font-size: 0.9rem;
     }
+
+
+/*Exercise Library Styles */
+
+.exercise-item {
+    cursor: pointer;
+}
+
+.exercise-details {
+    margin-bottom: 20px;
+}
+
+.exercise-details h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.exercise-details p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.edit-button {
+    background-color: #f0ad4e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.edit-button:hover {
+    background-color: #ec971f;
+}
+
+    
 }

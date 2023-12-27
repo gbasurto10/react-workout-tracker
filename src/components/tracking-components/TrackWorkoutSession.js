@@ -43,6 +43,7 @@ const TrackWorkoutSession = () => {
     const [newExerciseData, setNewExerciseData] = useState({
         name: '',
         type: '',
+        description: '',
         trackTime: false,
         trackDistance: false,
         trackWeight: false,
@@ -337,6 +338,7 @@ const TrackWorkoutSession = () => {
             const exerciseDataToSend = {
                 name: newExerciseData.name,
                 type: newExerciseData.type,
+                description: newExerciseData.description,
                 tracksTime: newExerciseData.trackTime,
                 tracksDistance: newExerciseData.trackDistance,
                 tracksWeight: newExerciseData.trackWeight,
@@ -695,7 +697,11 @@ const TrackWorkoutSession = () => {
                                 placeholder="Exercise Type"
                                 onChange={(e) => setNewExerciseData({ ...newExerciseData, type: e.target.value })}
                             />
-
+                            <input
+                                type="text"
+                                placeholder="Notes"
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, description: e.target.value })}   
+                            />
                             <div>
                                 <label>
                                     <input

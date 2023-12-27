@@ -29,6 +29,7 @@ const ExerciseLibrary = () => {
 
     const handleExerciseClick = (exercise) => {
         setSelectedExercise(exercise);
+        console.log("Selected Exercise: ", exercise);
         setEditableExercise({ ...exercise }); // Copy the selected exercise to the editable state
         setIsEditMode(false); // Reset to view mode whenever a new exercise is clicked
     };
@@ -44,7 +45,7 @@ const ExerciseLibrary = () => {
 
     const handleInputChange = (event) => {
         const { name, value, type, checked } = event.target;
-    
+
         // Handle checkboxes separately to convert boolean checked state to 1 or 0
         if (type === "checkbox") {
             setEditableExercise({ ...editableExercise, [name]: checked });
@@ -52,7 +53,7 @@ const ExerciseLibrary = () => {
             setEditableExercise({ ...editableExercise, [name]: value });
         }
     };
-    
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -68,15 +69,26 @@ const ExerciseLibrary = () => {
                 TracksWeight: editableExercise.TracksWeight ? 1 : 0,
             };
             await updateExercise(selectedExercise.ExerciseID, exerciseToUpdate);
-    
-            // Now update the exercises in the state with the new details
-            setExercises(exercises.map(ex => ex.ExerciseID === selectedExercise.ExerciseID ? { ...ex, ...exerciseToUpdate } : ex));
+
+            // Refetch exercises to get the most up-to-date list
+            const fetchedExercises = await fetchExercises();
+            const sortedExercises = fetchedExercises.sort((a, b) => {
+                const nameA = a.Name.toLowerCase();
+                const nameB = b.Name.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            setExercises(sortedExercises); // Update the state with the new, sorted exercises
+
+            // Find and update the selected exercise with its new details
+            const updatedSelectedExercise = sortedExercises.find(ex => ex.ExerciseID === selectedExercise.ExerciseID);
+            setSelectedExercise(updatedSelectedExercise || null); // Update or clear if not found
+
             setIsEditMode(false); // Exit edit mode on successful update
         } catch (error) {
             console.error("Failed to update exercise:", error);
         }
     };
-    
+
 
 
     return (
@@ -84,7 +96,7 @@ const ExerciseLibrary = () => {
             <h1>Exercise Library</h1>
             <ul>
                 {exercises.map((exercise) => (
-                    <li key={exercise.ExerciseID} onClick={() => handleExerciseClick(exercise)}>
+                    <li key={exercise.ExerciseID} onClick={() => handleExerciseClick(exercise)} className="exercise-item">
                         <h2>{exercise.Name}</h2>
                     </li>
                 ))}
@@ -107,7 +119,7 @@ const ExerciseLibrary = () => {
                                 </div>
                                 <div>
                                     {/* Edit Description */}
-                                    <label htmlFor="description">Description:</label>
+                                    <label htmlFor="description">Notes:</label>
                                     <textarea id="description" name="Description" value={editableExercise.Description} onChange={handleInputChange} />
                                 </div>
                                 <div>
@@ -127,24 +139,27 @@ const ExerciseLibrary = () => {
                                 <div>
                                     {/* Edit TracksWeight */}
                                     <label>
-                                    <input type="checkbox" id="tracksWeight" name="TracksWeight" checked={editableExercise.TracksWeight} onChange={handleInputChange}
-                                    /> Track Weight
+                                        <input type="checkbox" id="tracksWeight" name="TracksWeight" checked={editableExercise.TracksWeight} onChange={handleInputChange}
+                                        /> Track Weight
                                     </label>
                                 </div>
                                 <div>
                                     {/* Edit TracksReps */}
                                     <label>
-                                    <input type="checkbox" id="tracksReps" name="TracksReps" checked={editableExercise.TracksReps} onChange={handleInputChange}
-                                    /> Track Reps
+                                        <input type="checkbox" id="tracksReps" name="TracksReps" checked={editableExercise.TracksReps} onChange={handleInputChange}
+                                        /> Track Reps
                                     </label>
                                 </div>
                                 <button className="button" type="submit" onClick={handleSubmit}>Update Exercise</button>
                             </form>
                         ) : (
                             <>
-                                <h2>{selectedExercise.Name}</h2>
-                                <p>Type: {selectedExercise.Type}</p>
-                                <button onClick={handleEditClick}>Edit</button>
+                                <div className="exercise-details">
+                                    <h2>{selectedExercise.Name}</h2>
+                                    <p>Type: {selectedExercise.Type}</p>
+                                    <p>Notes: {selectedExercise.Description || "No notes provided"}</p>
+                                </div>
+                                <button className="button" onClick={handleEditClick}>Edit</button>
                             </>
                         )}
                     </div>
