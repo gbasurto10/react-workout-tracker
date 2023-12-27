@@ -217,6 +217,7 @@ export async function startNewWorkoutSession(clientId) {
     return response.json();
 }
 
+// Fetch Exercises  
 export async function fetchExercises() {
     const response = await fetch(`${API_URL}/exercises`, {
         method: 'GET',
@@ -230,6 +231,7 @@ export async function fetchExercises() {
     return response.json();
 }
 
+// Create New Exercise
 export async function createNewExercise(exerciseData) {
     const response = await fetch(`${API_URL}/exercises`, {
         method: 'POST',
@@ -243,6 +245,49 @@ export async function createNewExercise(exerciseData) {
 
     return response.json();
 }
+
+// Update an Exercise
+export async function updateExercise(exerciseId, exerciseData) {
+    // Construct the URL with the exercise ID
+    const url = `${API_URL}/update-exercise/${exerciseId}`;
+
+    // Destructure and rename the fields from exerciseData to match the database structure
+    const { Name, Type, Description, TracksTime, TracksDistance, TracksReps, TracksWeight } = exerciseData;
+
+    // Convert boolean values to 1 or 0 for TracksTime, TracksDistance, TracksReps, and TracksWeight
+    const requestBody = {
+        Name,
+        Type,
+        Description, // Make sure this is a string or null
+        TracksTime: TracksTime ? 1 : 0,
+        TracksDistance: TracksDistance ? 1 : 0,
+        TracksReps: TracksReps ? 1 : 0,
+        TracksWeight: TracksWeight ? 1 : 0,
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'PUT', // PUT method for updating
+            headers: headers,
+            body: JSON.stringify(requestBody), // Use requestBody with the correct structure
+        });
+
+        // Check if the request was successful
+        if (!response.ok) {
+            // Handle different types of errors (e.g., 400, 404, 500)
+            const errorBody = await response.json(); // Assuming the server sends JSON error details
+            throw new Error(errorBody.message || 'Failed to update exercise');
+        }
+
+        // Return the updated exercise data or success confirmation
+        return response.json();
+    } catch (error) {
+        console.error('Error updating exercise:', error);
+        throw error; // Rethrow the error for handling by the caller
+    }
+}
+
+
 
 // Save a workout session
 export async function saveWorkoutSession(sessionId, exercises) {
