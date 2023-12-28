@@ -7,7 +7,8 @@ import {
     finishWorkoutSession,
     deleteWorkoutSession,
     fetchSessionExercises,
-    fetchExerciseHistory
+    fetchExerciseHistory,
+    fetchActiveSessionDetails
 } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,7 @@ const TrackWorkoutSession = () => {
     const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
     const [isDropdownVisible, setIsDropdownVisible] = useState({});
     const [isCreateExerciseModalOpen, setIsCreateExerciseModalOpen] = useState(false);
+    
 
     const [newExerciseData, setNewExerciseData] = useState({
         name: '',
@@ -72,6 +74,24 @@ const TrackWorkoutSession = () => {
         transform: 'translateX(0)',
     };
 
+
+    // Fetch sesssion details when the component mounts
+    useEffect(() => {
+        const fetchActiveDetails = async () => {
+            try {
+                const details = await fetchActiveSessionDetails(sessionId);
+                setSessionDetails(details);  // Store the active session details in state
+                console.log("Session Details Fetched:", details);
+            } catch (error) {
+                console.error('Error fetching session details:', error);
+                // You might want to handle this error, perhaps show an error message to the user
+            }
+        };
+
+        if (sessionId) {
+            fetchActiveDetails();
+        }
+    }, [sessionId]);
 
 
     // Fetch session exercises when the component mounts
@@ -596,6 +616,16 @@ const TrackWorkoutSession = () => {
             <div className="track-workout-container">
                 <div className="main-workout-view">
                     <h2 className="header">Track Workout Session</h2>
+                    <div className="session-details">
+                        {sessionDetails ? (
+                            <>
+                                <p><strong>Date:</strong> {new Date(sessionDetails.Date).toLocaleDateString()}</p>
+                                <p><strong>Description:</strong> {sessionDetails.Description}</p>
+                            </>
+                        ) : (
+                            <p>Loading session details...</p>
+                        )}
+                    </div>
                     {exercises.map((exercise, exerciseIndex) => {
                         let supersetHeading = null;
                         if (exercise.supersetId && exercise.supersetId !== lastSupersetId) {
@@ -700,7 +730,7 @@ const TrackWorkoutSession = () => {
                             <input
                                 type="text"
                                 placeholder="Notes"
-                                onChange={(e) => setNewExerciseData({ ...newExerciseData, description: e.target.value })}   
+                                onChange={(e) => setNewExerciseData({ ...newExerciseData, description: e.target.value })}
                             />
                             <div>
                                 <label>

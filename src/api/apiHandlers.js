@@ -142,6 +142,7 @@ export async function fetchTrainers() {
 
 // Fetch Workout Sessions for a Client
 export async function fetchWorkoutSessions(clientId) {
+    console.log(`Making API call to URL: ${API_URL}/workout-sessions/${clientId}`);
     const response = await fetch(`${API_URL}/workout-sessions/${clientId}`, {
         method: 'GET',
         headers: headers,
@@ -153,6 +154,32 @@ export async function fetchWorkoutSessions(clientId) {
 
     return response.json();
 }
+
+
+// Fetch Details of an Active Workout Session
+export async function fetchActiveSessionDetails(sessionId) {
+    const url = `${API_URL}/workout-session-active/${sessionId}`;
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: headers,
+        });
+        if (!response.ok) {
+            const errorData = await response.text(); // Using text() in case the response is not in JSON format
+            console.error('[Client] Error fetching active workout session details:', errorData);
+            throw new Error(errorData || 'Fetching active workout session details failed');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('[Client] Error in fetchActiveSessionDetails:', error);
+        throw error;
+    }
+}
+
+
+
 
 // In your API handler file
 export async function assignTrainerToClient(clientUserId, trainerUserId) {
