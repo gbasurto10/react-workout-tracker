@@ -369,6 +369,19 @@ body {
     padding-bottom: 2rem;
 }
 
+.session-description-input {
+    width: 60%;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease-in-out;
+    margin-bottom: 20px;
+}
+
 .exercise-section {
     background-color: #f7f7f7;
     border-radius: 8px;

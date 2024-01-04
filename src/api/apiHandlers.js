@@ -178,6 +178,30 @@ export async function fetchActiveSessionDetails(sessionId) {
     }
 }
 
+// Update Details of an ACtive Workout Session
+export async function updateActiveSessionDetails(sessionId, description) {
+    const url = `${API_URL}/update-workout-session-active/${sessionId}`;
+    try {
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify({ description }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('[Client] Error updating active workout session description:', errorData);
+            throw new Error(errorData || 'Updating active workout session description failed');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('[Client] Error in updateActiveSessionDescription:', error);
+        throw error;
+    }
+}
+
+
 
 
 

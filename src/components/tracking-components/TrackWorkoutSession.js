@@ -8,7 +8,8 @@ import {
     deleteWorkoutSession,
     fetchSessionExercises,
     fetchExerciseHistory,
-    fetchActiveSessionDetails
+    fetchActiveSessionDetails,
+    updateActiveSessionDetails
 } from '../../api/apiHandlers';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ const defaultExercise = {
 };
 
 const TrackWorkoutSession = () => {
-    const [sessionDetails, setSessionDetails] = useState(null);
+    const [sessionDetails, setSessionDetails] = useState({ description: "" });
     const [exercises, setExercises] = useState([defaultExercise]);
     const [availableExercises, setAvailableExercises] = useState([]);
     const { sessionId } = useParams();
@@ -40,7 +41,6 @@ const TrackWorkoutSession = () => {
     const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
     const [isDropdownVisible, setIsDropdownVisible] = useState({});
     const [isCreateExerciseModalOpen, setIsCreateExerciseModalOpen] = useState(false);
-    
 
     const [newExerciseData, setNewExerciseData] = useState({
         name: '',
@@ -80,11 +80,16 @@ const TrackWorkoutSession = () => {
         const fetchActiveDetails = async () => {
             try {
                 const details = await fetchActiveSessionDetails(sessionId);
-                setSessionDetails(details);  // Store the active session details in state
-                console.log("Session Details Fetched:", details);
+                // Normalize the keys or handle the data appropriately here
+                // Assuming 'Description' is the correct key from your server
+                const normalizedDetails = {
+                    ...details,
+                    description: details.Description || details.description // Fallback to whichever is present
+                };
+                setSessionDetails(normalizedDetails);
+                console.log('Fetched session details:', details);
             } catch (error) {
                 console.error('Error fetching session details:', error);
-                // You might want to handle this error, perhaps show an error message to the user
             }
         };
 
@@ -92,6 +97,13 @@ const TrackWorkoutSession = () => {
             fetchActiveDetails();
         }
     }, [sessionId]);
+
+    // Temp Log SEssion (Delete)
+    useEffect(() => {
+        console.log('Updated sessionDetails:', sessionDetails);
+    }, [sessionDetails]); // Log whenever sessionDetails changes
+
+
 
 
     // Fetch session exercises when the component mounts
@@ -311,10 +323,15 @@ const TrackWorkoutSession = () => {
             console.log('Data being sent for saving:', { sessionId, preparedExercises }); // Add this line to log the data
             await saveWorkoutSession(sessionId, preparedExercises);
 
+            // Check if the description is empty or undefined, and set a default message
+            const descriptionToSend = sessionDetails.description || "No notes were created.";
+
+            // Update the session description using sessionDetails
+            console.log("SessionId:", sessionId, "Description:", sessionDetails.description);
+            await updateActiveSessionDetails(sessionId, descriptionToSend);
+
             // Mark the session as finished
             await finishWorkoutSession(sessionId);
-
-            // Handle post-save actions (e.g., navigate or show a message)
 
             // Clear local storage
             localStorage.removeItem('workoutSession');
@@ -620,7 +637,15 @@ const TrackWorkoutSession = () => {
                         {sessionDetails ? (
                             <>
                                 <p><strong>Date:</strong> {new Date(sessionDetails.Date).toLocaleDateString()}</p>
-                                <p><strong>Description:</strong> {sessionDetails.Description}</p>
+                                <input
+                                    value={sessionDetails.description || ""}
+                                    onChange={(e) => {
+                                        console.log("Input changed to:", e.target.value);
+                                        setSessionDetails({ ...sessionDetails, description: e.target.value });
+                                    }}
+                                    placeholder="Session Notes..."
+                                    className="session-description-input"
+                                />
                             </>
                         ) : (
                             <p>Loading session details...</p>
