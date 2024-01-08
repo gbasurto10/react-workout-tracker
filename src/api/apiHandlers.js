@@ -401,6 +401,31 @@ export async function updateWorkoutSession(sessionId) {
     return response.json();
 }
 
+// Duplicate a Workout Session
+export async function duplicateWorkoutSession(sessionId) {
+    const url = `${API_URL}/duplicate-session/${sessionId}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('[Client] Error duplicating workout session:', errorData);
+            throw new Error(errorData || 'Duplicating workout session failed');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('[Client] Error in duplicateWorkoutSession:', error);
+        throw error;
+    }
+}
+
+
 // Fetch Exercise History for a Specific Exercise
 export async function fetchExerciseHistory(userId, exerciseId) {
     try {

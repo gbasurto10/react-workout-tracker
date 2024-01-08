@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { fetchSessionDetails, deleteWorkoutSession, updateWorkoutSession } from '../../api/apiHandlers';
+import { fetchSessionDetails, deleteWorkoutSession, updateWorkoutSession, duplicateWorkoutSession } from '../../api/apiHandlers';
 
 const WorkoutSession = () => {
     // Inside your component
@@ -61,7 +61,7 @@ const WorkoutSession = () => {
             <h2 className="header">Workout Session Details - Session ID: {sessionDetails.SessionID}</h2>
             <p className="workout-session-description">Date: {new Date(sessionDetails.Date).toLocaleDateString()}</p>
             <p className="workout-session-description">Description: {sessionDetails.Description}</p>
-    
+
             {sessionDetails.Exercises.map((exercise, index) => {
                 // Check if this is the first exercise of a superset
                 if (exercise.SupersetID && sessionDetails.Exercises.findIndex(e => e.SupersetID === exercise.SupersetID) === index) {
@@ -134,7 +134,7 @@ const WorkoutSession = () => {
                 // If it is not the first exercise of a superset, we don't render it again.
                 return null;
             })}
-    
+
             {/* Delete and Update Workout Buttons */}
             <button onClick={() => {
                 if (window.confirm('Are you sure you want to delete this workout?')) {
@@ -148,9 +148,28 @@ const WorkoutSession = () => {
                     .then(() => navigate(`/track-workout-session/${sessionDetails.SessionID}/${clientId}`))
                     .catch(err => console.error('Error updating workout session:', err));
             }}>Update Workout</button>
+            <button onClick={() => {
+                duplicateWorkoutSession(sessionDetails.SessionID)
+                    .then(response => {
+                        // Handle success. For example, navigate to the new session's detail page or refresh the current page
+                        console.log('Duplicated session successfully', response);
+                        const newSessionId = response.newSessionId; // Assuming the response contains the new session ID
+
+                        // Option 1: Navigate to the new duplicated session's detail page (if you have such a route)
+                        navigate(`/track-workout-session/${newSessionId}/${clientId}`);
+
+                        // Option 2: Refresh the current page or workout sessions list
+                        // window.location.reload(); // Or any other method to refresh the data
+                    })
+                    .catch(err => {
+                        // Handle any errors that occurred during the duplication process
+                        console.error('Error duplicating workout session:', err);
+                        alert('Failed to duplicate the session. Please try again.'); // Simple error feedback
+                    });
+            }}>Duplicate Workout</button>
         </div>
     );
-    
+
 
 
 
