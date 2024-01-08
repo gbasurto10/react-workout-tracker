@@ -87,7 +87,6 @@ const TrackWorkoutSession = () => {
                     description: details.Description || details.description // Fallback to whichever is present
                 };
                 setSessionDetails(normalizedDetails);
-                console.log('Fetched session details:', details);
             } catch (error) {
                 console.error('Error fetching session details:', error);
             }
@@ -100,7 +99,6 @@ const TrackWorkoutSession = () => {
 
     // Temp Log SEssion (Delete)
     useEffect(() => {
-        console.log('Updated sessionDetails:', sessionDetails);
     }, [sessionDetails]); // Log whenever sessionDetails changes
 
 
@@ -152,7 +150,6 @@ const TrackWorkoutSession = () => {
                     });
                 });
 
-                console.log('Session Data:', sessionExercisesData);
 
                 // Flatten the supersets into a sorted array and process tracking flags
                 let exercisesArray = [];
@@ -187,7 +184,6 @@ const TrackWorkoutSession = () => {
                 // Sort by OrderID to maintain the overall order
                 exercisesArray.sort((a, b) => a.order - b.order);
 
-                console.log('Fetched exercises:', exercisesArray);
                 setExercises(exercisesArray);
             } catch (err) {
                 console.error('Error loading session exercises:', err);
@@ -217,7 +213,6 @@ const TrackWorkoutSession = () => {
     // Function to load exercises
     const loadExercises = async () => {
         const exercisesData = await fetchExercises();
-        console.log('Exercises:', exercisesData);
 
         exercisesData.sort((a, b) => a.Name.localeCompare(b.Name));
 
@@ -246,7 +241,6 @@ const TrackWorkoutSession = () => {
         setExercises(newExercises);
         setIsDropdownVisible({ ...isDropdownVisible, [index]: false }); // Hide the dropdown
 
-        console.log('Selected exercise:', newExercises[index]);
     };
 
 
@@ -320,14 +314,12 @@ const TrackWorkoutSession = () => {
         try {
             // Your existing logic to save the workout session
             const preparedExercises = prepareExercisesForSave();
-            console.log('Data being sent for saving:', { sessionId, preparedExercises }); // Add this line to log the data
             await saveWorkoutSession(sessionId, preparedExercises);
 
             // Check if the description is empty or undefined, and set a default message
             const descriptionToSend = sessionDetails.description || "No notes were created.";
 
             // Update the session description using sessionDetails
-            console.log("SessionId:", sessionId, "Description:", sessionDetails.description);
             await updateActiveSessionDetails(sessionId, descriptionToSend);
 
             // Mark the session as finished
@@ -368,7 +360,6 @@ const TrackWorkoutSession = () => {
 
     const handleCreateNewExercise = async (event) => {
         event.preventDefault();
-        console.log('Creating new exercise with data:', newExerciseData);
 
         try {
             // Ensure newExerciseData is structured as required by your backend
@@ -382,7 +373,6 @@ const TrackWorkoutSession = () => {
                 tracksReps: newExerciseData.trackReps
             };
 
-            console.log('Sending data to create new exercise:', exerciseDataToSend);
 
             await createNewExercise(exerciseDataToSend);
 
@@ -405,6 +395,8 @@ const TrackWorkoutSession = () => {
         try {
             const historyData = await fetchExerciseHistory(clientId, exerciseId);
             setExerciseHistory(historyData);
+            console.log(historyData);
+            
         } catch (err) {
             console.error('Error loading exercise history:', err);
             // Optionally, handle the error in the UI, e.g., show an error message
@@ -623,11 +615,6 @@ const TrackWorkoutSession = () => {
 
 
 
-
-
-
-
-
     return (
         <form onSubmit={handleSubmit}>
             <div className="track-workout-container">
@@ -640,7 +627,6 @@ const TrackWorkoutSession = () => {
                                 <input
                                     value={sessionDetails.description || ""}
                                     onChange={(e) => {
-                                        console.log("Input changed to:", e.target.value);
                                         setSessionDetails({ ...sessionDetails, description: e.target.value });
                                     }}
                                     placeholder="Session Notes..."
@@ -724,10 +710,8 @@ const TrackWorkoutSession = () => {
                     {Object.keys(groupedHistory).map(date => {
                         const today = new Date();
                         const formattedToday = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
-                        console.log("Formatted Today's Date:", formattedToday);
 
                         if (date === formattedToday) {
-                            console.log("Skipping history for today:", date);
                             return null;
                         }
 
@@ -737,12 +721,16 @@ const TrackWorkoutSession = () => {
                                 <ul>
                                     {groupedHistory[date].map((item, index) => (
                                         <li key={index}>
-                                            <strong>Set {item.SetNumber}:</strong> {item.Reps} reps at {item.Weight} lbs
+                                            <strong>Set {item.SetNumber}:</strong>
+                                            {item.Reps !== null && <span> <strong>{item.Reps}</strong> <span>reps</span></span>}
+                                            {item.Weight !== null && <span> at <strong>{item.Weight}</strong> lbs</span>}
+                                            {item.Time !== null && <span> for <strong>{item.Time}</strong> seconds</span>}
+                                            {item.Distance !== null && <span> covering <strong>{item.Distance}</strong> meters</span>}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-                        );
+                        );                        
                     })}
                     <button className="track-workout-button" onClick={toggleSlideOver}>Close</button>
                 </div>
