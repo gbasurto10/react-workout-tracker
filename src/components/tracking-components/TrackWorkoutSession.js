@@ -721,21 +721,34 @@ const TrackWorkoutSession = () => {
             {isSlideOverOpen && (
                 <div className="slide-over-container open">
                     <h3>Exercise History</h3>
-                    {Object.keys(groupedHistory).map(date => (
-                        <div key={date}>
-                            <h4>{date}</h4>
-                            <ul>
-                                {groupedHistory[date].map((item, index) => (
-                                    <li key={index}>
-                                        <strong>Set {item.SetNumber}:</strong> {item.Reps} reps at {item.Weight} lbs
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    {Object.keys(groupedHistory).map(date => {
+                        const today = new Date();
+                        const formattedToday = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+                        console.log("Formatted Today's Date:", formattedToday);
+
+                        if (date === formattedToday) {
+                            console.log("Skipping history for today:", date);
+                            return null;
+                        }
+
+                        return (
+                            <div key={date}>
+                                <h4>{date}</h4>
+                                <ul>
+                                    {groupedHistory[date].map((item, index) => (
+                                        <li key={index}>
+                                            <strong>Set {item.SetNumber}:</strong> {item.Reps} reps at {item.Weight} lbs
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        );
+                    })}
                     <button className="track-workout-button" onClick={toggleSlideOver}>Close</button>
                 </div>
             )}
+
+
 
             {isCreateExerciseModalOpen && (
                 <div className="modal">
